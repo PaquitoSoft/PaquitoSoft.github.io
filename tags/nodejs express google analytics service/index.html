@@ -3,15 +3,13 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Local Storage and Single Origin Policy | This is my little universe</title>
+  <title>nodejs express google analytics service | This is my little universe</title>
   <meta name="author" content="Paquitosoft">
-  
-  <meta name="description" content="This is a story about a funny issue I found the first time I used localStorage in a web project.">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="Local Storage and Single Origin Policy"/>
+  
   <meta property="og:site_name" content="This is my little universe"/>
 
   
@@ -43,54 +41,63 @@
 </nav>
 <div class="clearfix"></div></header>
   <div id="content" class="inner">
-    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title tag">nodejs express google analytics service</h2>
+
+
+  
+    <article class="post">
   
   <div class="post-content">
     <header>
       
         <div class="icon"></div>
-        <time datetime="2013-10-06T19:55:45.000Z"><a href="/2013/10/06/local-storage-and-single-origin-policy/">Oct 6 2013</a></time>
+        <time datetime="2013-10-16T20:29:51.000Z"><a href="/2013/10/16/consuming-ga-data-from-nodejs-express-app/">Oct 16 2013</a></time>
       
       
   
-    <h1 class="title">Local Storage and Single Origin Policy</h1>
+    <h1 class="title"><a href="/2013/10/16/consuming-ga-data-from-nodejs-express-app/">Consuming GA data from NodeJS express app</a></h1>
   
 
     </header>
     <div class="entry">
       
-        <p>This is a story about a funny issue I found the first time I used localStorage in a web project.</p>
+        <p>I didn&#39;t have a great time trying to implement a <em>simple</em> feature involving Google Analytics in one of my projects (nodejs web application).  </p>
+<p>My humble requirement was to collect some data (events) I was pushing to Google Analytics in order to create a simple report for my users.<br>Since it isn&#39;t a critical report, my idea was to get the data once a day and cache it.  </p>
+<p>So, as simple as it seems, it has been a tough trip for me and I want to share the whole process with the community. I hope anyone trying to achive something similar gets to this article and find it helpful.</p>
+<p>These are the main steps I had to take:</p>
+<ul>
+<li>Register an application in <a href="https://code.google.com/apis/console" target="_blank">Google API console center</a></li>
+<li>Create a service account</li>
+<li>Register the newly created service account generated email into the Google Analytics account I wanted to consume</li>
+<li>Implement the authorization token request (create a <em>JWT</em>)</li>
+<li>Implement the request to collect data from Google Analytics</li>
+</ul>
 
       
     </div>
     <footer>
       
         
+          <div class="alignleft">
+            <a href="/2013/10/16/consuming-ga-data-from-nodejs-express-app/#more" class="more-link">Read More</a>
+          </div>
         
         
-  <div class="addthis addthis_toolbox addthis_default_style">
-    
-      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
-    
-    
-      <a class="addthis_button_tweet"></a>
-    
-    
-      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
-    
-    
-      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
-    
-    <a class="addthis_counter addthis_pill_style"></a>
-  </div>
-  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
-
       
       <div class="clearfix"></div>
     </footer>
   </div>
 </article>
 
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
 </div></div>
     <aside id="sidebar" class="alignright">
   <div class="search">
@@ -103,6 +110,15 @@
   
 
   
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/nodejs express google analytics service/">nodejs express google analytics service</a><small>1</small></li>
+  
+  </ul>
+</div>
+
 </aside>
     <div class="clearfix"></div>
   </div>

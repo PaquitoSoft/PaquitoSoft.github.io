@@ -48,54 +48,36 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2013-10-06T19:55:45.000Z"><a href="/2013/10/06/local-storage-and-single-origin-policy/">Oct 6 2013</a></time>
+        <time datetime="2013-10-16T20:29:51.000Z"><a href="/2013/10/16/consuming-ga-data-from-nodejs-express-app/">Oct 16 2013</a></time>
       
       
   
-    <h1 class="title"><a href="/2013/10/06/local-storage-and-single-origin-policy/">Local Storage and Single Origin Policy</a></h1>
+    <h1 class="title"><a href="/2013/10/16/consuming-ga-data-from-nodejs-express-app/">Consuming GA data from NodeJS express app</a></h1>
   
 
     </header>
     <div class="entry">
       
-        <p>This is a story about a funny issue I found the first time I used localStorage in a web project.</p>
+        <p>I didn&#39;t have a great time trying to implement a <em>simple</em> feature involving Google Analytics in one of my projects (nodejs web application).  </p>
+<p>My humble requirement was to collect some data (events) I was pushing to Google Analytics in order to create a simple report for my users.<br>Since it isn&#39;t a critical report, my idea was to get the data once a day and cache it.  </p>
+<p>So, as simple as it seems, it has been a tough trip for me and I want to share the whole process with the community. I hope anyone trying to achive something similar gets to this article and find it helpful.</p>
+<p>These are the main steps I had to take:</p>
+<ul>
+<li>Register an application in <a href="https://code.google.com/apis/console" target="_blank">Google API console center</a></li>
+<li>Create a service account</li>
+<li>Register the newly created service account generated email into the Google Analytics account I wanted to consume</li>
+<li>Implement the authorization token request (create a <em>JWT</em>)</li>
+<li>Implement the request to collect data from Google Analytics</li>
+</ul>
 
       
     </div>
     <footer>
       
         
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2013-10-06T19:51:50.000Z"><a href="/2013/10/06/hello-world/">Oct 6 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/10/06/hello-world/">Hello World</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>Welcome to <a href="http://zespia.tw/hexo" target="_blank">Hexo</a>! This is your very first post. Check <a href="http://zespia.tw/hexo/docs" target="_blank">documentation</a> to learn how to use.</p>
-
-      
-    </div>
-    <footer>
-      
+          <div class="alignleft">
+            <a href="/2013/10/16/consuming-ga-data-from-nodejs-express-app/#more" class="more-link">Read More</a>
+          </div>
         
         
       
@@ -123,6 +105,15 @@
   
 
   
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/nodejs express google analytics service/">nodejs express google analytics service</a><small>1</small></li>
+  
+  </ul>
+</div>
+
 </aside>
     <div class="clearfix"></div>
   </div>
