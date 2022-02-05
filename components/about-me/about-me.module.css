@@ -1,0 +1,32 @@
+.aboutMeContainer {
+	text-align: center;
+}
+
+.title {
+	background-color: var(--titleBackgroundColor);
+	color: var(--titleForegroundColor);
+	padding: 10px;
+}
+
+.avatar {
+	border-radius: 100%;
+}
+
+.footer {
+	padding-top: 5px;
+	padding-bottom: 10px;
+}
+
+.footer ul {
+	padding: 0;
+	margin: 0;
+}
+
+.profileLink {
+	display: inline;
+	padding: 0 10px;
+}
+
+.profileLink svg {
+	fill: var(--titleBackgroundColor);
+}
