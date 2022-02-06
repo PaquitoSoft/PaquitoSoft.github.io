@@ -1,0 +1,266 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"/><meta charSet="utf-8"/><title>Ractive.js tutorial - The final touch (6 of 6)</title><meta name="date" content="2015-08-02T18:32:00.629Z"/><meta name="keywords" content="tutorial, javascript, ractive, ractivejs"/><meta name="next-head-count" content="5"/><link rel="preload" href="/_next/static/css/fca08b764e01d142.css" as="style"/><link rel="stylesheet" href="/_next/static/css/fca08b764e01d142.css" data-n-g=""/><link rel="preload" href="/_next/static/css/4727cb7922ba92a1.css" as="style"/><link rel="stylesheet" href="/_next/static/css/4727cb7922ba92a1.css" data-n-p=""/><noscript data-n-css=""></noscript><script defer="" nomodule="" src="/_next/static/chunks/polyfills-5cd94c89d3acac5f.js"></script><script src="/_next/static/chunks/webpack-f6f8e789435065da.js" defer=""></script><script src="/_next/static/chunks/framework-91d7f78b5b4003c8.js" defer=""></script><script src="/_next/static/chunks/main-59f1ed9830ced99b.js" defer=""></script><script src="/_next/static/chunks/pages/_app-12e47b2d3cbfdb5e.js" defer=""></script><script src="/_next/static/chunks/834-1fce47b417d9f245.js" defer=""></script><script src="/_next/static/chunks/pages/post/%5Bslug%5D-86b3e650bf853aa5.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_buildManifest.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_ssgManifest.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_middlewareManifest.js" defer=""></script></head><body><div id="__next" data-reactroot=""><header class="header_header__U_Kza"><a class="title-link_titleLink__5zxWi header_title__DvyTk" href="/"><h2>Paquitosoft&#x27;s corner</h2></a></header><main class="container main-content"><div class="grid"><section><div><article class="card_card__43_8m"><header class="card_title__ITk4U"><h3>Ractive.js tutorial - The final touch (6 of 6)</h3></header><div><span><p>(<em>Previous step: <a href="/post/ractive-js-tutorial-managing-users-notes">Managing user's notes</a></em>)</p>
+<p>There are some little things we should improve in our application:</p>
+<ul>
+<li><a href="#home-flickering">Home flickering</a></li>
+<li><a href="#show-errors">Show errors</a></li>
+<li><a href="#cache-ajax">Cache ajax requests</a></li>
+</ul>
+<h2>Home flickering</h2>
+<p>Right now, if you reload the page with a user page URL in the browser, you first see the home page and then you're redirected to the user page.
+When we load the application and the router (<a href="https://github.com/visionmedia/page.js">PageJS</a>) gets initialized, it checks the URL and invokes the corresponding route handler (you can disable this behaviour if you want to by using the <a href="https://github.com/visionmedia/page.js#pageoptions"><em>dispatch</em> attribute</a>).
+As we have configured the default view to be 'HomePage' in our <em>App</em> instance, it will get loaded before the router does its magic.</p>
+<p>My solution for this is to create an empty view in our <em>App</em> and set it to be the default view, so we won't see any sub-view until the router invokes the right route handler and the right view is promoted to be shown.</p>
+<p><strong><em>root-folder</em>/app/js/app.js</strong> (<em>include a default empty view</em>)</p>
+<pre><code class="language-javascript">import Ractive from 'ractive';
+import template from '../views/app.html';
+
+import * as RouterPlugin from './plugins/router';
+import routesConfiguration from './config/routes';
+
+import RouterComponent from './components/layout/router';
+import SearchUserComponent from './components/layout/search-user';
+import HomePageComponent from './components/home-page';
+import UserPageComponent from './components/user-page'
+
+let App = new Ractive({
+	el: '#app',
+	template: template,
+	components: {
+		SearchUser: SearchUserComponent,
+		Router: RouterComponent,
+		EmptyPage: Ractive.extend({ template: '' })
+	},
+	data: {
+		componentName: 'EmptyPage'
+	},
+	oninit() {
+		RouterPlugin.init(routesConfiguration, this.onNavigation.bind(this));
+		console.log('App::oninit# Application initialized!');
+	},
+	onNavigation(error, navigationContext) {
+		console.log('APP::onNavigation# Navigating to:', navigationContext.pageName, 'with context:', navigationContext);
+
+		if (error) {
+			console.warn('App::onNavigation# Error navigating:', error);
+		} else {
+			this.set({
+				req: {
+					params: navigationContext.params,
+					body: navigationContext.state
+				},
+				componentName: navigationContext.pageName
+			});
+		}
+	}
+});
+
+export default App;
+</code></pre>
+<h2>Show errors</h2>
+<p>Right now if you look for a user that doesn't exist in GitHub, you won't get notified. The error is only printed in the browser tools console.
+We just need to add a little <em>html</em> to our main application template and a little code to our <em>App</em> instance to show the message.</p>
+<p><strong><em>root-folder</em>/app/views/app.html</strong> (<em>add error message markup</em>)</p>
+<pre><code class="language-html">&lt;div class=&quot;main-container&quot;&gt;
+	&lt;nav class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;&gt;
+		&lt;div class=&quot;col-sm-1&quot;&gt;
+			&lt;a href=&quot;/&quot;&gt;
+				&lt;h3&gt;Notetaker&lt;/h3&gt;
+			&lt;/a&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;col-sm-7 col-sm-offset-1&quot; style=&quot;margin-top: 15px;&quot;&gt;
+			&lt;SearchUser placeholder=&quot;Type a GitHub username...&quot; /&gt;
+		&lt;/div&gt;
+	&lt;/nav&gt;
+	&lt;div class=&quot;container&quot;&gt;
+		&lt;Router componentName=&quot;{{componentName}}&quot;/&gt;
+	&lt;/div&gt;
+	{{#errorMsg}}
+		&lt;div class=&quot;alert alert-danger alert-dismissible&quot; style=&quot;position: absolute; top: 80px; right: 10px;&quot; role=&quot;alert&quot;&gt;
+			&lt;button type=&quot;button&quot; class=&quot;close&quot; aria-label=&quot;Close&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
+			&lt;strong&gt;Error:&lt;/strong&gt; {{errorMsg}}
+		&lt;/div&gt;
+	{{/errorMsg}}
+&lt;/div&gt;
+</code></pre>
+<p><strong><em>root-folder</em>/app/js/app.js</strong> (_add 'showAlert' function and use it from the routes handler)</p>
+<pre><code class="language-javascript">import Ractive from 'ractive';
+import template from '../views/app.html';
+
+import * as RouterPlugin from './plugins/router';
+import routesConfiguration from './config/routes';
+
+import RouterComponent from './components/layout/router';
+import SearchUserComponent from './components/layout/search-user';
+import HomePageComponent from './components/home-page';
+import UserPageComponent from './components/user-page'
+
+let App = new Ractive({
+	el: '#app',
+	template: template,
+	components: {
+		SearchUser: SearchUserComponent,
+		Router: RouterComponent,
+		EmptyPage: Ractive.extend({ template: '' })
+	},
+	data: {
+		componentName: 'EmptyPage'
+	},
+	oninit() {
+		RouterPlugin.init(routesConfiguration, this.onNavigation.bind(this));
+		console.log('App::oninit# Application initialized!');
+	},
+	onNavigation(error, navigationContext) {
+		console.log('APP::onNavigation# Navigating to:', navigationContext.pageName, 'with context:', navigationContext);
+
+		if (error) {
+			console.warn('App::onNavigation# Error navigating:', error);
+			this.showAlert(error.displayMessage || error.message);
+		} else {
+			this.set({
+				req: {
+					params: navigationContext.params,
+					body: navigationContext.state
+				},
+				componentName: navigationContext.pageName
+			});
+		}
+	},
+	showAlert(message) {
+		this.set('errorMsg', message);
+		setTimeout(() =&gt; {
+			this.set('errorMsg', null);
+		}, 2500);
+	}
+});
+
+export default App;
+</code></pre>
+<h2>Cache ajax requests</h2>
+<p>The users info we're getting from GitHub doesn't change very often and, also, GitHub has <a href="https://developer.github.com/v3/#rate-limiting">some limitations</a> on unauthorized requests you can make per hour.
+It would be great to cache that info in the broswer (for example: using <em>localStorage</em>) so we avoid those limiations and the application reponds faster when asking for the same user info several times.
+We will use the great <a href="https://github.com/pamelafox/lscache">lscache</a> library so it handles <em>localStorage</em> management and it allows us to set TTLs (<em>time to live</em>) on our stored values to get automatically invalidated.</p>
+<p>On the one hand, we need to specify which request we want to cache. In our user model, we set the GitHub requests to be cached for one hour.</p>
+<p>First we need to install the dependecy:</p>
+<pre><code>$ npm install lscache --save
+</code></pre>
+<p><strong><em>root-folder</em>/app/js/models/user.js</strong> (<em>set GitHub ajax request to be cached</em>)</p>
+<pre><code class="language-javascript">import * as ajax from '../plugins/ajax';
+
+const GITHUB_BASE_URL = 'https://api.github.com';
+const FIREBASE_BASE_URL = `https://ps-github-saver.firebaseio.com`;
+
+class User {
+	
+	constructor(profile, repos, notes) {
+		this.profile = profile;
+		this.repos = repos;
+		this.notes = notes || []; // Default parameters values are only valid for undefined ones
+	}
+
+	addNote(newNote) {
+		this.notes.push(newNote);
+		return ajax.putJson(`${FIREBASE_BASE_URL}/${this.profile.login.toLowerCase()}.json`, this.notes);
+	}
+
+	removeNote(note) {
+		var index = this.notes.indexOf(note);
+		if (index &gt;= 0) {
+				this.notes.splice(index, 1);
+			return ajax.putJson(`${FIREBASE_BASE_URL}/${this.profile.login.toLowerCase()}.json`, this.notes);
+		}
+	}
+
+	static findByName(username) {
+		let userProfileUrl = `${GITHUB_BASE_URL}/users/${username}`,
+			userReposUrl = `${GITHUB_BASE_URL}/users/${username}/repos`,
+			userNotesUrl = `${FIREBASE_BASE_URL}/${username.toLowerCase()}.json`;
+
+		let result = new Promise((resolve, reject) =&gt; {
+			Promise.all([
+				ajax.getJson(userProfileUrl, {cache: true, ttl: 60}), // TTL in minutes
+				ajax.getJson(userReposUrl, {cache: true, ttl: 60}), // TTL in minutes
+				ajax.getJson(userNotesUrl)
+			])
+			.then(values =&gt; {
+				resolve(new User(values[0], values[1], values[2]));
+			})
+			.catch(reject);
+		});
+
+		return result;
+	}
+}
+
+export default User;
+</code></pre>
+<p>Now we need to update our <em>ajax</em> plugin to use <em>lscache</em> library and deal with caching configuration:
+<strong><em>root-folder</em>/js/app/plugins/ajax.js</strong></p>
+<pre><code class="language-javascript">import lscache from 'lscache';
+
+function checkResponseStatus(res) {
+	if (res.status &lt; 400) {
+		return res;
+	} else {
+		let error = new Error(res.statusText);
+		error.statusCode = res.status;
+		error.response = res;
+		throw error;
+	}
+}
+
+function parseJson(res) {
+	return new Promise((resolve) =&gt; {
+		res.json().then(data =&gt; {
+			resolve({
+				json: data,
+				url: res.url
+			});
+		});
+	});
+}
+
+function cacheResponse(shouldCache, ttl, key) {
+	return (data) =&gt; {
+		if (shouldCache) {
+			console.log('Ajax::cacheResponse# Caching response with key:', key, 'for', ttl, 'minutes.');
+			lscache.set(data.url, data.json, ttl); // Last parameter is TTL in minutes
+		}
+		return data.json;
+	}
+}
+
+export function getJson(url, options = {cache: false}) {
+	let data = lscache.get(url);
+	if (data) {
+		return Promise.resolve(data);
+	} else {
+		return fetch(url)
+			.then(checkResponseStatus)
+			.then(parseJson)
+			.then(cacheResponse(options.cache, options.ttl, url));
+	}
+}
+
+export function putJson(url, data) {
+	return fetch(url, {
+		method: 'put',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json'
+		},
+			body: JSON.stringify(data)
+		})
+		.then(checkResponseStatus);
+}
+</code></pre>
+<p>Now you can check with your browser tools that, if you load several times the same user, only the first one will issue request to GitHub.</p>
+<hr>
+<p>You can check the source code in <a href="https://github.com/PaquitoSoft/notetaker-ractive">this GitHub repo</a>.</p>
+<hr>
+<h2>Ending</h2>
+<p>First of all, I want to thank you for getting all the way of this long tutorial until the end.
+I hope you found it insteresting and that you have learned something new that will be useful in the future.</p>
+<p>I decided to write this tutorial not only because I want to spread the word about <a href="http://www.ractivejs.org/">Ractive.js</a> (note that I'm not involved in the project at all; I'm only one of its users), but because in my carrer I have read many many tutorials that helped me to be a better developer and I wanted to give back the same to the community.</p>
+<p>If you liked this tutorial, please talk about it in your favorite social network or to your collegues, and you would make my day if you drop me a line by e-mail (paquitosoftware at gmail.com) or in Twitter (@telemaco82).</p>
+<hr>
+</span></div><footer class="card_footer__5rntJ"><div>Published: <!-- -->02/08/2015</div></footer></article></div></section><aside><article class="about-me_aboutMeContainer__tBCGw"><header class="about-me_title__My_yA">About me</header><div><img class="about-me_avatar__rCHR2" src="/images/gravatar.jpg" alt="Paquitosoft avatar" height="150" width="150"/></div><footer class="about-me_footer__Io_kX"><ul><li class="about-me_profileLink__b1Ipw"><a href="https://github.com/PaquitoSoft" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"></path></svg></a></li><li class="about-me_profileLink__b1Ipw"><a href="https://twitter.com/telemaco82" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.79C20.33,8.6 20.33,8.42 20.32,8.23C21.16,7.63 21.88,6.87 22.46,6Z"></path></svg></a></li><li class="about-me_profileLink__b1Ipw"><a href="hhtps://www.linkedin.com/in/carlos-martínez-cortizas-81763b2b" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M19 3A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H19M18.5 18.5V13.2A3.26 3.26 0 0 0 15.24 9.94C14.39 9.94 13.4 10.46 12.92 11.24V10.13H10.13V18.5H12.92V13.57C12.92 12.8 13.54 12.17 14.31 12.17A1.4 1.4 0 0 1 15.71 13.57V18.5H18.5M6.88 8.56A1.68 1.68 0 0 0 8.56 6.88C8.56 5.95 7.81 5.19 6.88 5.19A1.69 1.69 0 0 0 5.19 6.88C5.19 7.81 5.95 8.56 6.88 8.56M8.27 18.5V10.13H5.5V18.5H8.27Z"></path></svg></a></li></ul></footer></article></aside></div></main><footer class="footer_footer__GaW5f">Developed using<a href="https://nextjs.org" target="_blank" rel="noreferrer">Next.js</a> and<a href="https://picocss.com/" target="_blank" rel="noreferrer">PicoCSS</a></footer></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"post":{"slug":"ractive-js-tutorial-the-final-touch","title":"Ractive.js tutorial - The final touch (6 of 6)","creationDate":"2015-08-02T18:32:00.629Z","keywords":"tutorial, javascript, ractive, ractivejs","status":"published","excerpt":"\u003cp\u003e(\u003cem\u003ePrevious step: \u003ca href=\"/post/ractive-js-tutorial-managing-users-notes\"\u003eManaging user's notes\u003c/a\u003e\u003c/em\u003e)\u003c/p\u003e\n\u003cp\u003eThere are some little things we should improve in our application:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ca href=\"#home-flickering\"\u003eHome flickering\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"#show-errors\"\u003eShow errors\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"#cache-ajax\"\u003eCache ajax requests\u003c/a\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003ch2\u003eHome flickering\u003c/h2\u003e\n\u003cp\u003eRight now, if you reload the page with a user page URL in the browser, you first see the home page and then you're redirected to the user page.\nWhen we load the application and the router (\u003ca href=\"https://github.com/visionmedia/page.js\"\u003ePageJS\u003c/a\u003e) gets initialized, it checks the URL and invokes the corresponding route handler (you can disable this behaviour if you want to by using the \u003ca href=\"https://github.com/visionmedia/page.js#pageoptions\"\u003e\u003cem\u003edispatch\u003c/em\u003e attribute\u003c/a\u003e).\nAs we have configured the default view to be 'HomePage' in our \u003cem\u003eApp\u003c/em\u003e instance, it will get loaded before the router does its magic.\u003c/p\u003e\n\u003cp\u003eMy solution for this is to create an empty view in our \u003cem\u003eApp\u003c/em\u003e and set it to be the default view, so we won't see any sub-view until the router invokes the right route handler and the right view is promoted to be shown.\u003c/p\u003e\n","content":"\u003cp\u003e(\u003cem\u003ePrevious step: \u003ca href=\"/post/ractive-js-tutorial-managing-users-notes\"\u003eManaging user's notes\u003c/a\u003e\u003c/em\u003e)\u003c/p\u003e\n\u003cp\u003eThere are some little things we should improve in our application:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ca href=\"#home-flickering\"\u003eHome flickering\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"#show-errors\"\u003eShow errors\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"#cache-ajax\"\u003eCache ajax requests\u003c/a\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003ch2\u003eHome flickering\u003c/h2\u003e\n\u003cp\u003eRight now, if you reload the page with a user page URL in the browser, you first see the home page and then you're redirected to the user page.\nWhen we load the application and the router (\u003ca href=\"https://github.com/visionmedia/page.js\"\u003ePageJS\u003c/a\u003e) gets initialized, it checks the URL and invokes the corresponding route handler (you can disable this behaviour if you want to by using the \u003ca href=\"https://github.com/visionmedia/page.js#pageoptions\"\u003e\u003cem\u003edispatch\u003c/em\u003e attribute\u003c/a\u003e).\nAs we have configured the default view to be 'HomePage' in our \u003cem\u003eApp\u003c/em\u003e instance, it will get loaded before the router does its magic.\u003c/p\u003e\n\u003cp\u003eMy solution for this is to create an empty view in our \u003cem\u003eApp\u003c/em\u003e and set it to be the default view, so we won't see any sub-view until the router invokes the right route handler and the right view is promoted to be shown.\u003c/p\u003e\n\u003cp\u003e\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/app.js\u003c/strong\u003e (\u003cem\u003einclude a default empty view\u003c/em\u003e)\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-javascript\"\u003eimport Ractive from 'ractive';\nimport template from '../views/app.html';\n\nimport * as RouterPlugin from './plugins/router';\nimport routesConfiguration from './config/routes';\n\nimport RouterComponent from './components/layout/router';\nimport SearchUserComponent from './components/layout/search-user';\nimport HomePageComponent from './components/home-page';\nimport UserPageComponent from './components/user-page'\n\nlet App = new Ractive({\n\tel: '#app',\n\ttemplate: template,\n\tcomponents: {\n\t\tSearchUser: SearchUserComponent,\n\t\tRouter: RouterComponent,\n\t\tEmptyPage: Ractive.extend({ template: '' })\n\t},\n\tdata: {\n\t\tcomponentName: 'EmptyPage'\n\t},\n\toninit() {\n\t\tRouterPlugin.init(routesConfiguration, this.onNavigation.bind(this));\n\t\tconsole.log('App::oninit# Application initialized!');\n\t},\n\tonNavigation(error, navigationContext) {\n\t\tconsole.log('APP::onNavigation# Navigating to:', navigationContext.pageName, 'with context:', navigationContext);\n\n\t\tif (error) {\n\t\t\tconsole.warn('App::onNavigation# Error navigating:', error);\n\t\t} else {\n\t\t\tthis.set({\n\t\t\t\treq: {\n\t\t\t\t\tparams: navigationContext.params,\n\t\t\t\t\tbody: navigationContext.state\n\t\t\t\t},\n\t\t\t\tcomponentName: navigationContext.pageName\n\t\t\t});\n\t\t}\n\t}\n});\n\nexport default App;\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch2\u003eShow errors\u003c/h2\u003e\n\u003cp\u003eRight now if you look for a user that doesn't exist in GitHub, you won't get notified. The error is only printed in the browser tools console.\nWe just need to add a little \u003cem\u003ehtml\u003c/em\u003e to our main application template and a little code to our \u003cem\u003eApp\u003c/em\u003e instance to show the message.\u003c/p\u003e\n\u003cp\u003e\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/views/app.html\u003c/strong\u003e (\u003cem\u003eadd error message markup\u003c/em\u003e)\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;div class=\u0026quot;main-container\u0026quot;\u0026gt;\n\t\u0026lt;nav class=\u0026quot;navbar navbar-default\u0026quot; role=\u0026quot;navigation\u0026quot;\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;col-sm-1\u0026quot;\u0026gt;\n\t\t\t\u0026lt;a href=\u0026quot;/\u0026quot;\u0026gt;\n\t\t\t\t\u0026lt;h3\u0026gt;Notetaker\u0026lt;/h3\u0026gt;\n\t\t\t\u0026lt;/a\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;col-sm-7 col-sm-offset-1\u0026quot; style=\u0026quot;margin-top: 15px;\u0026quot;\u0026gt;\n\t\t\t\u0026lt;SearchUser placeholder=\u0026quot;Type a GitHub username...\u0026quot; /\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\t\u0026lt;/nav\u0026gt;\n\t\u0026lt;div class=\u0026quot;container\u0026quot;\u0026gt;\n\t\t\u0026lt;Router componentName=\u0026quot;{{componentName}}\u0026quot;/\u0026gt;\n\t\u0026lt;/div\u0026gt;\n\t{{#errorMsg}}\n\t\t\u0026lt;div class=\u0026quot;alert alert-danger alert-dismissible\u0026quot; style=\u0026quot;position: absolute; top: 80px; right: 10px;\u0026quot; role=\u0026quot;alert\u0026quot;\u0026gt;\n\t\t\t\u0026lt;button type=\u0026quot;button\u0026quot; class=\u0026quot;close\u0026quot; aria-label=\u0026quot;Close\u0026quot;\u0026gt;\u0026lt;span aria-hidden=\u0026quot;true\u0026quot;\u0026gt;\u0026amp;times;\u0026lt;/span\u0026gt;\u0026lt;/button\u0026gt;\n\t\t\t\u0026lt;strong\u0026gt;Error:\u0026lt;/strong\u0026gt; {{errorMsg}}\n\t\t\u0026lt;/div\u0026gt;\n\t{{/errorMsg}}\n\u0026lt;/div\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/app.js\u003c/strong\u003e (_add 'showAlert' function and use it from the routes handler)\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-javascript\"\u003eimport Ractive from 'ractive';\nimport template from '../views/app.html';\n\nimport * as RouterPlugin from './plugins/router';\nimport routesConfiguration from './config/routes';\n\nimport RouterComponent from './components/layout/router';\nimport SearchUserComponent from './components/layout/search-user';\nimport HomePageComponent from './components/home-page';\nimport UserPageComponent from './components/user-page'\n\nlet App = new Ractive({\n\tel: '#app',\n\ttemplate: template,\n\tcomponents: {\n\t\tSearchUser: SearchUserComponent,\n\t\tRouter: RouterComponent,\n\t\tEmptyPage: Ractive.extend({ template: '' })\n\t},\n\tdata: {\n\t\tcomponentName: 'EmptyPage'\n\t},\n\toninit() {\n\t\tRouterPlugin.init(routesConfiguration, this.onNavigation.bind(this));\n\t\tconsole.log('App::oninit# Application initialized!');\n\t},\n\tonNavigation(error, navigationContext) {\n\t\tconsole.log('APP::onNavigation# Navigating to:', navigationContext.pageName, 'with context:', navigationContext);\n\n\t\tif (error) {\n\t\t\tconsole.warn('App::onNavigation# Error navigating:', error);\n\t\t\tthis.showAlert(error.displayMessage || error.message);\n\t\t} else {\n\t\t\tthis.set({\n\t\t\t\treq: {\n\t\t\t\t\tparams: navigationContext.params,\n\t\t\t\t\tbody: navigationContext.state\n\t\t\t\t},\n\t\t\t\tcomponentName: navigationContext.pageName\n\t\t\t});\n\t\t}\n\t},\n\tshowAlert(message) {\n\t\tthis.set('errorMsg', message);\n\t\tsetTimeout(() =\u0026gt; {\n\t\t\tthis.set('errorMsg', null);\n\t\t}, 2500);\n\t}\n});\n\nexport default App;\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch2\u003eCache ajax requests\u003c/h2\u003e\n\u003cp\u003eThe users info we're getting from GitHub doesn't change very often and, also, GitHub has \u003ca href=\"https://developer.github.com/v3/#rate-limiting\"\u003esome limitations\u003c/a\u003e on unauthorized requests you can make per hour.\nIt would be great to cache that info in the broswer (for example: using \u003cem\u003elocalStorage\u003c/em\u003e) so we avoid those limiations and the application reponds faster when asking for the same user info several times.\nWe will use the great \u003ca href=\"https://github.com/pamelafox/lscache\"\u003elscache\u003c/a\u003e library so it handles \u003cem\u003elocalStorage\u003c/em\u003e management and it allows us to set TTLs (\u003cem\u003etime to live\u003c/em\u003e) on our stored values to get automatically invalidated.\u003c/p\u003e\n\u003cp\u003eOn the one hand, we need to specify which request we want to cache. In our user model, we set the GitHub requests to be cached for one hour.\u003c/p\u003e\n\u003cp\u003eFirst we need to install the dependecy:\u003c/p\u003e\n\u003cpre\u003e\u003ccode\u003e$ npm install lscache --save\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/models/user.js\u003c/strong\u003e (\u003cem\u003eset GitHub ajax request to be cached\u003c/em\u003e)\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-javascript\"\u003eimport * as ajax from '../plugins/ajax';\n\nconst GITHUB_BASE_URL = 'https://api.github.com';\nconst FIREBASE_BASE_URL = `https://ps-github-saver.firebaseio.com`;\n\nclass User {\n\t\n\tconstructor(profile, repos, notes) {\n\t\tthis.profile = profile;\n\t\tthis.repos = repos;\n\t\tthis.notes = notes || []; // Default parameters values are only valid for undefined ones\n\t}\n\n\taddNote(newNote) {\n\t\tthis.notes.push(newNote);\n\t\treturn ajax.putJson(`${FIREBASE_BASE_URL}/${this.profile.login.toLowerCase()}.json`, this.notes);\n\t}\n\n\tremoveNote(note) {\n\t\tvar index = this.notes.indexOf(note);\n\t\tif (index \u0026gt;= 0) {\n\t\t\t\tthis.notes.splice(index, 1);\n\t\t\treturn ajax.putJson(`${FIREBASE_BASE_URL}/${this.profile.login.toLowerCase()}.json`, this.notes);\n\t\t}\n\t}\n\n\tstatic findByName(username) {\n\t\tlet userProfileUrl = `${GITHUB_BASE_URL}/users/${username}`,\n\t\t\tuserReposUrl = `${GITHUB_BASE_URL}/users/${username}/repos`,\n\t\t\tuserNotesUrl = `${FIREBASE_BASE_URL}/${username.toLowerCase()}.json`;\n\n\t\tlet result = new Promise((resolve, reject) =\u0026gt; {\n\t\t\tPromise.all([\n\t\t\t\tajax.getJson(userProfileUrl, {cache: true, ttl: 60}), // TTL in minutes\n\t\t\t\tajax.getJson(userReposUrl, {cache: true, ttl: 60}), // TTL in minutes\n\t\t\t\tajax.getJson(userNotesUrl)\n\t\t\t])\n\t\t\t.then(values =\u0026gt; {\n\t\t\t\tresolve(new User(values[0], values[1], values[2]));\n\t\t\t})\n\t\t\t.catch(reject);\n\t\t});\n\n\t\treturn result;\n\t}\n}\n\nexport default User;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eNow we need to update our \u003cem\u003eajax\u003c/em\u003e plugin to use \u003cem\u003elscache\u003c/em\u003e library and deal with caching configuration:\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/js/app/plugins/ajax.js\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-javascript\"\u003eimport lscache from 'lscache';\n\nfunction checkResponseStatus(res) {\n\tif (res.status \u0026lt; 400) {\n\t\treturn res;\n\t} else {\n\t\tlet error = new Error(res.statusText);\n\t\terror.statusCode = res.status;\n\t\terror.response = res;\n\t\tthrow error;\n\t}\n}\n\nfunction parseJson(res) {\n\treturn new Promise((resolve) =\u0026gt; {\n\t\tres.json().then(data =\u0026gt; {\n\t\t\tresolve({\n\t\t\t\tjson: data,\n\t\t\t\turl: res.url\n\t\t\t});\n\t\t});\n\t});\n}\n\nfunction cacheResponse(shouldCache, ttl, key) {\n\treturn (data) =\u0026gt; {\n\t\tif (shouldCache) {\n\t\t\tconsole.log('Ajax::cacheResponse# Caching response with key:', key, 'for', ttl, 'minutes.');\n\t\t\tlscache.set(data.url, data.json, ttl); // Last parameter is TTL in minutes\n\t\t}\n\t\treturn data.json;\n\t}\n}\n\nexport function getJson(url, options = {cache: false}) {\n\tlet data = lscache.get(url);\n\tif (data) {\n\t\treturn Promise.resolve(data);\n\t} else {\n\t\treturn fetch(url)\n\t\t\t.then(checkResponseStatus)\n\t\t\t.then(parseJson)\n\t\t\t.then(cacheResponse(options.cache, options.ttl, url));\n\t}\n}\n\nexport function putJson(url, data) {\n\treturn fetch(url, {\n\t\tmethod: 'put',\n\t\theaders: {\n\t\t\t'Accept': 'application/json',\n\t\t\t'Content-Type': 'application/json'\n\t\t},\n\t\t\tbody: JSON.stringify(data)\n\t\t})\n\t\t.then(checkResponseStatus);\n}\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eNow you can check with your browser tools that, if you load several times the same user, only the first one will issue request to GitHub.\u003c/p\u003e\n\u003chr\u003e\n\u003cp\u003eYou can check the source code in \u003ca href=\"https://github.com/PaquitoSoft/notetaker-ractive\"\u003ethis GitHub repo\u003c/a\u003e.\u003c/p\u003e\n\u003chr\u003e\n\u003ch2\u003eEnding\u003c/h2\u003e\n\u003cp\u003eFirst of all, I want to thank you for getting all the way of this long tutorial until the end.\nI hope you found it insteresting and that you have learned something new that will be useful in the future.\u003c/p\u003e\n\u003cp\u003eI decided to write this tutorial not only because I want to spread the word about \u003ca href=\"http://www.ractivejs.org/\"\u003eRactive.js\u003c/a\u003e (note that I'm not involved in the project at all; I'm only one of its users), but because in my carrer I have read many many tutorials that helped me to be a better developer and I wanted to give back the same to the community.\u003c/p\u003e\n\u003cp\u003eIf you liked this tutorial, please talk about it in your favorite social network or to your collegues, and you would make my day if you drop me a line by e-mail (paquitosoftware at gmail.com) or in Twitter (@telemaco82).\u003c/p\u003e\n\u003chr\u003e\n"},"_superjson":{"values":{"post.creationDate":["Date"]}}},"__N_SSG":true},"page":"/post/[slug]","query":{"slug":"ractive-js-tutorial-the-final-touch"},"buildId":"qDqkLNkeIvmmotP5mIhnk","isFallback":false,"gsp":true,"scriptLoader":[]}</script></body></html>

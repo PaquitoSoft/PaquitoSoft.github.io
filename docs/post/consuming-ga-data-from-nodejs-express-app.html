@@ -1,0 +1,188 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"/><meta charSet="utf-8"/><title>Consuming GA data from NodeJS Express app</title><meta name="date" content="2013-12-01T21:43:41.405Z"/><meta name="keywords" content="nodejs, express, google, analytics, ga, development"/><meta name="next-head-count" content="5"/><link rel="preload" href="/_next/static/css/fca08b764e01d142.css" as="style"/><link rel="stylesheet" href="/_next/static/css/fca08b764e01d142.css" data-n-g=""/><link rel="preload" href="/_next/static/css/4727cb7922ba92a1.css" as="style"/><link rel="stylesheet" href="/_next/static/css/4727cb7922ba92a1.css" data-n-p=""/><noscript data-n-css=""></noscript><script defer="" nomodule="" src="/_next/static/chunks/polyfills-5cd94c89d3acac5f.js"></script><script src="/_next/static/chunks/webpack-f6f8e789435065da.js" defer=""></script><script src="/_next/static/chunks/framework-91d7f78b5b4003c8.js" defer=""></script><script src="/_next/static/chunks/main-59f1ed9830ced99b.js" defer=""></script><script src="/_next/static/chunks/pages/_app-12e47b2d3cbfdb5e.js" defer=""></script><script src="/_next/static/chunks/834-1fce47b417d9f245.js" defer=""></script><script src="/_next/static/chunks/pages/post/%5Bslug%5D-86b3e650bf853aa5.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_buildManifest.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_ssgManifest.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_middlewareManifest.js" defer=""></script></head><body><div id="__next" data-reactroot=""><header class="header_header__U_Kza"><a class="title-link_titleLink__5zxWi header_title__DvyTk" href="/"><h2>Paquitosoft&#x27;s corner</h2></a></header><main class="container main-content"><div class="grid"><section><div><article class="card_card__43_8m"><header class="card_title__ITk4U"><h3>Consuming GA data from NodeJS Express app</h3></header><div><span><p>I didn't have a great time trying to implement a <em>simple</em> feature involving Google Analytics in one of my projects (nodejs web application).</p>
+<p>My humble requirement was to collect some data (events) I was pushing to Google Analytics in order to create a simple report for my users.
+Since it isn't a critical report, my idea was to get the data once a day and cache it.</p>
+<p>So, as simple as it seems, it has been a tough trip for me and I want to share the whole process with the community. I hope anyone trying to achive something similar gets to this article and find it helpful.</p>
+<p>These are the main steps I had to take:</p>
+<ul>
+<li>Register an application in <a href="https://code.google.com/apis/console">Google API console center</a></li>
+<li>Create a service account</li>
+<li>Register the newly created service account generated email into the Google Analytics account I wanted to consume</li>
+<li>Implement the authorization token request (create a <em>JWT</em>)</li>
+<li>Implement the request to collect data from Google Analytics</li>
+</ul>
+<h2>Registering an application in Google API console center</h2>
+<p>First of all you need to sign in into <a href="https://code.google.com/apis/console">Google API console center</a> and register a new project. Once you create it (you just need to fill the project name), you should select the <em>Services</em> link in the left vertical menu. Here you can set what Google services your project will need access to. So we click on the <em>Analytics API</em> switch button to activate this permission.</p>
+<p><img src="https://lh3.googleusercontent.com/-H2ECcOC-KTk/UN-DZCZzGSI/AAAAAAAAABY/zY0RlFoWPcI/s912/register_google_api_console.jpg" alt="Register a new application in Google API console"></p>
+<h2>Create a service account</h2>
+<p>Next we need to create the service account.<br>
+In the left vertical menu you should click in the <em>API Access</em> link. You should see a big blue button saying <em>Create an OAuth Client ID...</em>.</p>
+<p><img src="https://lh6.googleusercontent.com/-g7qvSvt3DPQ/UOasmIB_xzI/AAAAAAAAABo/e400jAuaMtA/s912/create_service_account_1.jpg" alt="Create service account (step 1)"></p>
+<p>Click there and you will be presented a popup to fill some info about the app that will be using the Google service. Fill the project name at least.</p>
+<p><img src="https://lh4.googleusercontent.com/-E_3Cq9o3cBk/UOasm4j6JRI/AAAAAAAAABw/-TZqTHHQTY8/s912/create_service_account_2.jpg" alt="Create service account (step 2)"></p>
+<p>Now you will get to a second step (inside the popup) where you need to choose you want to create a <em>service account</em>.</p>
+<p><img src="https://lh4.googleusercontent.com/-Or_U6ntuM7M/UOasoEXN0mI/AAAAAAAAAB0/aD_fJs5IQOI/s912/create_service_account_3.jpg" alt="Create service account (step 3)"></p>
+<p>After you click in <em>Create client ID</em> button, the popup will show a message stating that public-private key pair has been generated. You will get a password and your private key (the password is for working with the private key).<br>
+Save the private key file ('.p12' file type) into your hard drive.</p>
+<p><img src="https://lh5.googleusercontent.com/-y5XEIRMWwwk/UOaspLNWc6I/AAAAAAAAAB8/zN0mMwz8-fU/s912/create_service_account_4.jpg" alt="Create service account (step 4)"></p>
+<p>When you close the popup you will see a new section in the main page (<em>Service account</em>). You need to take not about the <em>Email address</em> generated for the service account.</p>
+<p><img src="https://lh5.googleusercontent.com/-bfkyPN8zCCU/UOasp-zLG3I/AAAAAAAAACE/NPFq01WJA0k/s912/create_service_account_5.jpg" alt="Create service account (step 5)"></p>
+<p>There's one important last step you need to take here. Google has given you a private key in a '.p12' file, but you will need a <em>.pem</em> file in order to sign your JWT.<br>
+In order to achieve this step you need to have <em>openssl</em> tool installed in your system.<br>
+Open a terminal and browse to the folder where you saved the private key. Then type this command:</p>
+<pre><code>my_computer$ openssl pkcs12 -in YOUR_PRIVATE_KEY_FILE.p12 -out demo_certificate.pem -nodes
+</code></pre>
+<p>After that, you will have a new file in your folder called <em>certificate.pem</em>. This is the one we will use later on.</p>
+<h2>Register service account in Google Analytics</h2>
+<p>In this step you need to grant read access to the brand new service account in your Google analytics project.<br>
+Log in to <a href="http://www.google.com/analytics/">Google Analytics</a> and navigate to your project. Enter de <em>Admin</em> section and look for the <em>Users</em> tab.</p>
+<p><img src="https://lh4.googleusercontent.com/-mFT-z5XXZag/UOasq46iNEI/AAAAAAAAACM/lMfqqxqfFYg/s912/grant_service_account_access_to_ga_1.jpg" alt="Grant access to service account in Google Analytics (step 1)"></p>
+<p>Click in the <em>New User</em> button and type the email for the service account you previously created. Use the <em>User</em> role.<br>
+In the <em>profile</em> section, select your Analytics project profile and add it to <em>Selected profiles</em> panel.<br>
+Finally, push <em>Create user button</em>.</p>
+<p><img src="https://lh4.googleusercontent.com/-zhgwYXNEFNc/UOasr9ayMZI/AAAAAAAAACU/Wyl7U__pXkA/s912/grant_service_account_access_to_ga_2.jpg" alt="Grant access to service account in Google Analytics (step 2)"></p>
+<p>That's it!</p>
+<h2>Implement authorization request</h2>
+<p>In order to access <em>Analytics</em> data, we need to get an authorization token first. We will use the email of the brand new service account created and also the private key (<em>.pem</em> file) to generate a <em>JWT</em> (JSON Web Token). We will send a <em>POST</em> request to Google with this JWT so they answer with an access token.</p>
+<p>Here is my version of the code implementing JWT generation and request:</p>
+<pre><code class="language-javascript">var fs = require('fs'),
+    crypto = require('crypto'),
+	request = require('request'); // This is an external module (https://github.com/mikeal/request)
+	
+var authHeader = {
+			'alg': 'RS256',
+		'typ': 'JWT'
+	},
+	authClaimSet = {
+			'iss': process.env.GA_SERVICE_ACCOUNT, // Service account email
+		'scope': 'https://www.googleapis.com/auth/analytics.readonly', // We MUST tell them we just want to read data
+		'aud': 'https://accounts.google.com/o/oauth2/token'
+	},
+	SIGNATURE_ALGORITHM = 'RSA-SHA256',
+	SIGNATURE_ENCODE_METHOD = 'base64',
+	GA_KEY_PATH = 'PATH_TO_YOUR_PRIVATE_KEY.pem',
+	gaKey;
+
+function urlEscape(source) {
+		return source.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/\\=+$/, '');
+}
+
+function base64Encode(obj) {
+		var encoded = new Buffer(JSON.stringify(obj), 'utf8').toString('base64');
+	return urlEscape(encoded);
+}
+
+function readPrivateKey() {
+		if (!gaKey) {
+			gaKey = fs.readFileSync(GA_KEY_PATH, 'utf8');
+	}
+	return gaKey;
+}
+
+var authorize = function(callback) {
+	
+	var self = this,
+		now = parseInt(Date.now() / 1000, 10), // Google wants us to use seconds
+		cipher,
+		signatureInput,
+		signatureKey = readPrivateKey(),
+		signature,
+		jwt;
+
+	// Setup time values
+	authClaimSet.iat = now;
+	authClaimSet.exp = now + 60; // Token valid for one minute
+
+	// Setup JWT source
+	signatureInput = base64Encode(authHeader) + '.' + base64Encode(authClaimSet);
+
+	// Generate JWT
+	cipher = crypto.createSign('RSA-SHA256');
+	cipher.update(signatureInput);
+	signature = cipher.sign(signatureKey, 'base64');
+	jwt = signatureInput + '.' + urlEscape(signature);
+	
+	// Send request to authorize this application
+	request({
+			method: 'POST',
+		headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		uri: 'https://accounts.google.com/o/oauth2/token',
+		body: 'grant_type=' + escape('urn:ietf:params:oauth:grant-type:jwt-bearer') +
+			'&amp;assertion=' + jwt
+	}, function(error, response, body) {
+			if (error) {
+				console.log(error);
+			callback(new Error(error));
+		} else {
+				var gaResult = JSON.parse(body);
+			if (gaResult.error) {
+					callback(new Error(gaResult.error));
+			} else {
+					callback(null, gaResult.access_token);
+			}
+		}
+	});
+
+};
+</code></pre>
+<p>The auth request must have two parameters:</p>
+<ul>
+<li>grant_type: This is a constant</li>
+<li>assertion: Generated JWT</li>
+</ul>
+<p>As you can see, JWT is created with three parts:</p>
+<ul>
+<li>a fixed header</li>
+<li>a claim set: info about what are what do we need the access token for</li>
+<li>a signature (generated based on the other two)</li>
+</ul>
+<p>The <em>scope</em> property of the <em>claim set</em> must be set to <em>readonly</em>. At least, I couldn't get it work without it, even if I set the service account with an administrator role in my <em>Analytics</em> project settings.</p>
+<p>The response from <em>Google</em> should be something like this:</p>
+<pre><code class="language-javascript">{
+	&quot;access_token&quot; : &quot;1/8xbJqaOZXSUZbHLl5EOtu1pxz3fmmetKx9W8CV4t79M&quot;,
+	&quot;token_type&quot;: &quot;Bearer&quot;,
+	&quot;expires_in&quot;: 3600
+}
+</code></pre>
+<h2>Implement analytics data request</h2>
+<p>The hard part is already done, this is the easy one.<br>
+Now we only need to make a request to <em>Google Analytics</em> service using our auth token.</p>
+<pre><code class="language-javascript">var request = require('request'),
+	qs = require('querystring');
+	
+authorize(function(err, token) {
+	if (!err) {
+		// Query the number of total visits for a month
+		var requestConfig = {
+				'ids': 'ga:YOUR_ANALYTICS_PROJECT_PROFILE_ID',
+			'start-date': '2012-12-01',
+			'end-date': '2012-12-21',
+			'dimensions': 'ga:visitors'
+			'max-results': '10'
+		};
+		
+		request({
+				method: 'GET',
+			headers: {
+					'Authorization': 'Bearer ' + token // Here is where we use the auth token
+			},
+			uri: 'https://www.googleapis.com/analytics/v3/data/ga?' + qs.stringify(requestConfig)
+		}, function(error, resp, body) {
+				var data = JSON.parse(body);
+			console.log(data);
+		});
+	}
+});
+</code></pre>
+<h2>References:</h2>
+<ul>
+<li><a href="https://developers.google.com/accounts/docs/OAuth2ServiceAccount">Using OAuth 2.0 for Server to Server Applications</a></li>
+<li><a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference">Google Analytics Core Reporting API - Reference Guide</a></li>
+<li><a href="http://ga-dev-tools.appspot.com/explorer/">Google Analytics Query Explorer 2</a></li>
+<li><a href="https://github.com/berngp/node-green-jwt">node-green-jwt</a></li>
+<li><a href="https://github.com/ncb000gt/node-googleanalytics">node-googleanalytics</a></li>
+<li><a href="http://stackoverflow.com/questions/9863509/service-applications-and-google-analytics-api-v3-server-to-server-oauth2-authen">Stack Overflow 1</a></li>
+<li><a href="http://stackoverflow.com/questions/11529595/is-a-service-account-the-right-credentials-for-querying-google-bigquery-in-node">Stack Overflow 2</a></li>
+</ul>
+</span></div><footer class="card_footer__5rntJ"><div>Published: <!-- -->01/12/2013</div></footer></article></div></section><aside><article class="about-me_aboutMeContainer__tBCGw"><header class="about-me_title__My_yA">About me</header><div><img class="about-me_avatar__rCHR2" src="/images/gravatar.jpg" alt="Paquitosoft avatar" height="150" width="150"/></div><footer class="about-me_footer__Io_kX"><ul><li class="about-me_profileLink__b1Ipw"><a href="https://github.com/PaquitoSoft" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"></path></svg></a></li><li class="about-me_profileLink__b1Ipw"><a href="https://twitter.com/telemaco82" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.79C20.33,8.6 20.33,8.42 20.32,8.23C21.16,7.63 21.88,6.87 22.46,6Z"></path></svg></a></li><li class="about-me_profileLink__b1Ipw"><a href="hhtps://www.linkedin.com/in/carlos-martínez-cortizas-81763b2b" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M19 3A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H19M18.5 18.5V13.2A3.26 3.26 0 0 0 15.24 9.94C14.39 9.94 13.4 10.46 12.92 11.24V10.13H10.13V18.5H12.92V13.57C12.92 12.8 13.54 12.17 14.31 12.17A1.4 1.4 0 0 1 15.71 13.57V18.5H18.5M6.88 8.56A1.68 1.68 0 0 0 8.56 6.88C8.56 5.95 7.81 5.19 6.88 5.19A1.69 1.69 0 0 0 5.19 6.88C5.19 7.81 5.95 8.56 6.88 8.56M8.27 18.5V10.13H5.5V18.5H8.27Z"></path></svg></a></li></ul></footer></article></aside></div></main><footer class="footer_footer__GaW5f">Developed using<a href="https://nextjs.org" target="_blank" rel="noreferrer">Next.js</a> and<a href="https://picocss.com/" target="_blank" rel="noreferrer">PicoCSS</a></footer></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"post":{"slug":"consuming-ga-data-from-nodejs-express-app","title":"Consuming GA data from NodeJS Express app","creationDate":"2013-12-01T21:43:41.405Z","keywords":"nodejs, express, google, analytics, ga, development","status":"published","excerpt":"\u003cp\u003eI didn't have a great time trying to implement a \u003cem\u003esimple\u003c/em\u003e feature involving Google Analytics in one of my projects (nodejs web application).\u003c/p\u003e\n\u003cp\u003eMy humble requirement was to collect some data (events) I was pushing to Google Analytics in order to create a simple report for my users.\nSince it isn't a critical report, my idea was to get the data once a day and cache it.\u003c/p\u003e\n\u003cp\u003eSo, as simple as it seems, it has been a tough trip for me and I want to share the whole process with the community. I hope anyone trying to achive something similar gets to this article and find it helpful.\u003c/p\u003e\n\u003cp\u003eThese are the main steps I had to take:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eRegister an application in \u003ca href=\"https://code.google.com/apis/console\"\u003eGoogle API console center\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003eCreate a service account\u003c/li\u003e\n\u003cli\u003eRegister the newly created service account generated email into the Google Analytics account I wanted to consume\u003c/li\u003e\n\u003cli\u003eImplement the authorization token request (create a \u003cem\u003eJWT\u003c/em\u003e)\u003c/li\u003e\n\u003cli\u003eImplement the request to collect data from Google Analytics\u003c/li\u003e\n\u003c/ul\u003e\n","content":"\u003cp\u003eI didn't have a great time trying to implement a \u003cem\u003esimple\u003c/em\u003e feature involving Google Analytics in one of my projects (nodejs web application).\u003c/p\u003e\n\u003cp\u003eMy humble requirement was to collect some data (events) I was pushing to Google Analytics in order to create a simple report for my users.\nSince it isn't a critical report, my idea was to get the data once a day and cache it.\u003c/p\u003e\n\u003cp\u003eSo, as simple as it seems, it has been a tough trip for me and I want to share the whole process with the community. I hope anyone trying to achive something similar gets to this article and find it helpful.\u003c/p\u003e\n\u003cp\u003eThese are the main steps I had to take:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eRegister an application in \u003ca href=\"https://code.google.com/apis/console\"\u003eGoogle API console center\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003eCreate a service account\u003c/li\u003e\n\u003cli\u003eRegister the newly created service account generated email into the Google Analytics account I wanted to consume\u003c/li\u003e\n\u003cli\u003eImplement the authorization token request (create a \u003cem\u003eJWT\u003c/em\u003e)\u003c/li\u003e\n\u003cli\u003eImplement the request to collect data from Google Analytics\u003c/li\u003e\n\u003c/ul\u003e\n\u003ch2\u003eRegistering an application in Google API console center\u003c/h2\u003e\n\u003cp\u003eFirst of all you need to sign in into \u003ca href=\"https://code.google.com/apis/console\"\u003eGoogle API console center\u003c/a\u003e and register a new project. Once you create it (you just need to fill the project name), you should select the \u003cem\u003eServices\u003c/em\u003e link in the left vertical menu. Here you can set what Google services your project will need access to. So we click on the \u003cem\u003eAnalytics API\u003c/em\u003e switch button to activate this permission.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"https://lh3.googleusercontent.com/-H2ECcOC-KTk/UN-DZCZzGSI/AAAAAAAAABY/zY0RlFoWPcI/s912/register_google_api_console.jpg\" alt=\"Register a new application in Google API console\"\u003e\u003c/p\u003e\n\u003ch2\u003eCreate a service account\u003c/h2\u003e\n\u003cp\u003eNext we need to create the service account.\u003cbr\u003e\nIn the left vertical menu you should click in the \u003cem\u003eAPI Access\u003c/em\u003e link. You should see a big blue button saying \u003cem\u003eCreate an OAuth Client ID...\u003c/em\u003e.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"https://lh6.googleusercontent.com/-g7qvSvt3DPQ/UOasmIB_xzI/AAAAAAAAABo/e400jAuaMtA/s912/create_service_account_1.jpg\" alt=\"Create service account (step 1)\"\u003e\u003c/p\u003e\n\u003cp\u003eClick there and you will be presented a popup to fill some info about the app that will be using the Google service. Fill the project name at least.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"https://lh4.googleusercontent.com/-E_3Cq9o3cBk/UOasm4j6JRI/AAAAAAAAABw/-TZqTHHQTY8/s912/create_service_account_2.jpg\" alt=\"Create service account (step 2)\"\u003e\u003c/p\u003e\n\u003cp\u003eNow you will get to a second step (inside the popup) where you need to choose you want to create a \u003cem\u003eservice account\u003c/em\u003e.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"https://lh4.googleusercontent.com/-Or_U6ntuM7M/UOasoEXN0mI/AAAAAAAAAB0/aD_fJs5IQOI/s912/create_service_account_3.jpg\" alt=\"Create service account (step 3)\"\u003e\u003c/p\u003e\n\u003cp\u003eAfter you click in \u003cem\u003eCreate client ID\u003c/em\u003e button, the popup will show a message stating that public-private key pair has been generated. You will get a password and your private key (the password is for working with the private key).\u003cbr\u003e\nSave the private key file ('.p12' file type) into your hard drive.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"https://lh5.googleusercontent.com/-y5XEIRMWwwk/UOaspLNWc6I/AAAAAAAAAB8/zN0mMwz8-fU/s912/create_service_account_4.jpg\" alt=\"Create service account (step 4)\"\u003e\u003c/p\u003e\n\u003cp\u003eWhen you close the popup you will see a new section in the main page (\u003cem\u003eService account\u003c/em\u003e). You need to take not about the \u003cem\u003eEmail address\u003c/em\u003e generated for the service account.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"https://lh5.googleusercontent.com/-bfkyPN8zCCU/UOasp-zLG3I/AAAAAAAAACE/NPFq01WJA0k/s912/create_service_account_5.jpg\" alt=\"Create service account (step 5)\"\u003e\u003c/p\u003e\n\u003cp\u003eThere's one important last step you need to take here. Google has given you a private key in a '.p12' file, but you will need a \u003cem\u003e.pem\u003c/em\u003e file in order to sign your JWT.\u003cbr\u003e\nIn order to achieve this step you need to have \u003cem\u003eopenssl\u003c/em\u003e tool installed in your system.\u003cbr\u003e\nOpen a terminal and browse to the folder where you saved the private key. Then type this command:\u003c/p\u003e\n\u003cpre\u003e\u003ccode\u003emy_computer$ openssl pkcs12 -in YOUR_PRIVATE_KEY_FILE.p12 -out demo_certificate.pem -nodes\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eAfter that, you will have a new file in your folder called \u003cem\u003ecertificate.pem\u003c/em\u003e. This is the one we will use later on.\u003c/p\u003e\n\u003ch2\u003eRegister service account in Google Analytics\u003c/h2\u003e\n\u003cp\u003eIn this step you need to grant read access to the brand new service account in your Google analytics project.\u003cbr\u003e\nLog in to \u003ca href=\"http://www.google.com/analytics/\"\u003eGoogle Analytics\u003c/a\u003e and navigate to your project. Enter de \u003cem\u003eAdmin\u003c/em\u003e section and look for the \u003cem\u003eUsers\u003c/em\u003e tab.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"https://lh4.googleusercontent.com/-mFT-z5XXZag/UOasq46iNEI/AAAAAAAAACM/lMfqqxqfFYg/s912/grant_service_account_access_to_ga_1.jpg\" alt=\"Grant access to service account in Google Analytics (step 1)\"\u003e\u003c/p\u003e\n\u003cp\u003eClick in the \u003cem\u003eNew User\u003c/em\u003e button and type the email for the service account you previously created. Use the \u003cem\u003eUser\u003c/em\u003e role.\u003cbr\u003e\nIn the \u003cem\u003eprofile\u003c/em\u003e section, select your Analytics project profile and add it to \u003cem\u003eSelected profiles\u003c/em\u003e panel.\u003cbr\u003e\nFinally, push \u003cem\u003eCreate user button\u003c/em\u003e.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"https://lh4.googleusercontent.com/-zhgwYXNEFNc/UOasr9ayMZI/AAAAAAAAACU/Wyl7U__pXkA/s912/grant_service_account_access_to_ga_2.jpg\" alt=\"Grant access to service account in Google Analytics (step 2)\"\u003e\u003c/p\u003e\n\u003cp\u003eThat's it!\u003c/p\u003e\n\u003ch2\u003eImplement authorization request\u003c/h2\u003e\n\u003cp\u003eIn order to access \u003cem\u003eAnalytics\u003c/em\u003e data, we need to get an authorization token first. We will use the email of the brand new service account created and also the private key (\u003cem\u003e.pem\u003c/em\u003e file) to generate a \u003cem\u003eJWT\u003c/em\u003e (JSON Web Token). We will send a \u003cem\u003ePOST\u003c/em\u003e request to Google with this JWT so they answer with an access token.\u003c/p\u003e\n\u003cp\u003eHere is my version of the code implementing JWT generation and request:\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-javascript\"\u003evar fs = require('fs'),\n    crypto = require('crypto'),\n\trequest = require('request'); // This is an external module (https://github.com/mikeal/request)\n\t\nvar authHeader = {\n\t\t\t'alg': 'RS256',\n\t\t'typ': 'JWT'\n\t},\n\tauthClaimSet = {\n\t\t\t'iss': process.env.GA_SERVICE_ACCOUNT, // Service account email\n\t\t'scope': 'https://www.googleapis.com/auth/analytics.readonly', // We MUST tell them we just want to read data\n\t\t'aud': 'https://accounts.google.com/o/oauth2/token'\n\t},\n\tSIGNATURE_ALGORITHM = 'RSA-SHA256',\n\tSIGNATURE_ENCODE_METHOD = 'base64',\n\tGA_KEY_PATH = 'PATH_TO_YOUR_PRIVATE_KEY.pem',\n\tgaKey;\n\nfunction urlEscape(source) {\n\t\treturn source.replace(/\\\\+/g, '-').replace(/\\\\//g, '_').replace(/\\\\=+$/, '');\n}\n\nfunction base64Encode(obj) {\n\t\tvar encoded = new Buffer(JSON.stringify(obj), 'utf8').toString('base64');\n\treturn urlEscape(encoded);\n}\n\nfunction readPrivateKey() {\n\t\tif (!gaKey) {\n\t\t\tgaKey = fs.readFileSync(GA_KEY_PATH, 'utf8');\n\t}\n\treturn gaKey;\n}\n\nvar authorize = function(callback) {\n\t\n\tvar self = this,\n\t\tnow = parseInt(Date.now() / 1000, 10), // Google wants us to use seconds\n\t\tcipher,\n\t\tsignatureInput,\n\t\tsignatureKey = readPrivateKey(),\n\t\tsignature,\n\t\tjwt;\n\n\t// Setup time values\n\tauthClaimSet.iat = now;\n\tauthClaimSet.exp = now + 60; // Token valid for one minute\n\n\t// Setup JWT source\n\tsignatureInput = base64Encode(authHeader) + '.' + base64Encode(authClaimSet);\n\n\t// Generate JWT\n\tcipher = crypto.createSign('RSA-SHA256');\n\tcipher.update(signatureInput);\n\tsignature = cipher.sign(signatureKey, 'base64');\n\tjwt = signatureInput + '.' + urlEscape(signature);\n\t\n\t// Send request to authorize this application\n\trequest({\n\t\t\tmethod: 'POST',\n\t\theaders: {\n\t\t\t\t'Content-Type': 'application/x-www-form-urlencoded'\n\t\t},\n\t\turi: 'https://accounts.google.com/o/oauth2/token',\n\t\tbody: 'grant_type=' + escape('urn:ietf:params:oauth:grant-type:jwt-bearer') +\n\t\t\t'\u0026amp;assertion=' + jwt\n\t}, function(error, response, body) {\n\t\t\tif (error) {\n\t\t\t\tconsole.log(error);\n\t\t\tcallback(new Error(error));\n\t\t} else {\n\t\t\t\tvar gaResult = JSON.parse(body);\n\t\t\tif (gaResult.error) {\n\t\t\t\t\tcallback(new Error(gaResult.error));\n\t\t\t} else {\n\t\t\t\t\tcallback(null, gaResult.access_token);\n\t\t\t}\n\t\t}\n\t});\n\n};\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThe auth request must have two parameters:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003egrant_type: This is a constant\u003c/li\u003e\n\u003cli\u003eassertion: Generated JWT\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eAs you can see, JWT is created with three parts:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003ea fixed header\u003c/li\u003e\n\u003cli\u003ea claim set: info about what are what do we need the access token for\u003c/li\u003e\n\u003cli\u003ea signature (generated based on the other two)\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThe \u003cem\u003escope\u003c/em\u003e property of the \u003cem\u003eclaim set\u003c/em\u003e must be set to \u003cem\u003ereadonly\u003c/em\u003e. At least, I couldn't get it work without it, even if I set the service account with an administrator role in my \u003cem\u003eAnalytics\u003c/em\u003e project settings.\u003c/p\u003e\n\u003cp\u003eThe response from \u003cem\u003eGoogle\u003c/em\u003e should be something like this:\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-javascript\"\u003e{\n\t\u0026quot;access_token\u0026quot; : \u0026quot;1/8xbJqaOZXSUZbHLl5EOtu1pxz3fmmetKx9W8CV4t79M\u0026quot;,\n\t\u0026quot;token_type\u0026quot;: \u0026quot;Bearer\u0026quot;,\n\t\u0026quot;expires_in\u0026quot;: 3600\n}\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch2\u003eImplement analytics data request\u003c/h2\u003e\n\u003cp\u003eThe hard part is already done, this is the easy one.\u003cbr\u003e\nNow we only need to make a request to \u003cem\u003eGoogle Analytics\u003c/em\u003e service using our auth token.\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-javascript\"\u003evar request = require('request'),\n\tqs = require('querystring');\n\t\nauthorize(function(err, token) {\n\tif (!err) {\n\t\t// Query the number of total visits for a month\n\t\tvar requestConfig = {\n\t\t\t\t'ids': 'ga:YOUR_ANALYTICS_PROJECT_PROFILE_ID',\n\t\t\t'start-date': '2012-12-01',\n\t\t\t'end-date': '2012-12-21',\n\t\t\t'dimensions': 'ga:visitors'\n\t\t\t'max-results': '10'\n\t\t};\n\t\t\n\t\trequest({\n\t\t\t\tmethod: 'GET',\n\t\t\theaders: {\n\t\t\t\t\t'Authorization': 'Bearer ' + token // Here is where we use the auth token\n\t\t\t},\n\t\t\turi: 'https://www.googleapis.com/analytics/v3/data/ga?' + qs.stringify(requestConfig)\n\t\t}, function(error, resp, body) {\n\t\t\t\tvar data = JSON.parse(body);\n\t\t\tconsole.log(data);\n\t\t});\n\t}\n});\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch2\u003eReferences:\u003c/h2\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ca href=\"https://developers.google.com/accounts/docs/OAuth2ServiceAccount\"\u003eUsing OAuth 2.0 for Server to Server Applications\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"https://developers.google.com/analytics/devguides/reporting/core/v3/reference\"\u003eGoogle Analytics Core Reporting API - Reference Guide\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"http://ga-dev-tools.appspot.com/explorer/\"\u003eGoogle Analytics Query Explorer 2\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"https://github.com/berngp/node-green-jwt\"\u003enode-green-jwt\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"https://github.com/ncb000gt/node-googleanalytics\"\u003enode-googleanalytics\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"http://stackoverflow.com/questions/9863509/service-applications-and-google-analytics-api-v3-server-to-server-oauth2-authen\"\u003eStack Overflow 1\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"http://stackoverflow.com/questions/11529595/is-a-service-account-the-right-credentials-for-querying-google-bigquery-in-node\"\u003eStack Overflow 2\u003c/a\u003e\u003c/li\u003e\n\u003c/ul\u003e\n"},"_superjson":{"values":{"post.creationDate":["Date"]}}},"__N_SSG":true},"page":"/post/[slug]","query":{"slug":"consuming-ga-data-from-nodejs-express-app"},"buildId":"qDqkLNkeIvmmotP5mIhnk","isFallback":false,"gsp":true,"scriptLoader":[]}</script></body></html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"/><meta charSet="utf-8"/><title>Ractive.js tutorial - Creating the barebones (2 of 6)</title><meta name="date" content="2015-07-28T20:35:02.558Z"/><meta name="keywords" content="tutorial, javascript, ractive, ractivejs"/><meta name="next-head-count" content="5"/><link rel="preload" href="/_next/static/css/fca08b764e01d142.css" as="style"/><link rel="stylesheet" href="/_next/static/css/fca08b764e01d142.css" data-n-g=""/><link rel="preload" href="/_next/static/css/4727cb7922ba92a1.css" as="style"/><link rel="stylesheet" href="/_next/static/css/4727cb7922ba92a1.css" data-n-p=""/><noscript data-n-css=""></noscript><script defer="" nomodule="" src="/_next/static/chunks/polyfills-5cd94c89d3acac5f.js"></script><script src="/_next/static/chunks/webpack-f6f8e789435065da.js" defer=""></script><script src="/_next/static/chunks/framework-91d7f78b5b4003c8.js" defer=""></script><script src="/_next/static/chunks/main-59f1ed9830ced99b.js" defer=""></script><script src="/_next/static/chunks/pages/_app-12e47b2d3cbfdb5e.js" defer=""></script><script src="/_next/static/chunks/834-1fce47b417d9f245.js" defer=""></script><script src="/_next/static/chunks/pages/post/%5Bslug%5D-86b3e650bf853aa5.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_buildManifest.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_ssgManifest.js" defer=""></script><script src="/_next/static/qDqkLNkeIvmmotP5mIhnk/_middlewareManifest.js" defer=""></script></head><body><div id="__next" data-reactroot=""><header class="header_header__U_Kza"><a class="title-link_titleLink__5zxWi header_title__DvyTk" href="/"><h2>Paquitosoft&#x27;s corner</h2></a></header><main class="container main-content"><div class="grid"><section><div><article class="card_card__43_8m"><header class="card_title__ITk4U"><h3>Ractive.js tutorial - Creating the barebones (2 of 6)</h3></header><div><span><p>(<em>Previous step</em>: <a href="/post/ractive-js-tutorial-setting-up-your-environment/">Setting up your environment</a>)</p>
+<p>Ok, so now that you have all ready to fly, let's check what we want to do.</p>
+<p>The goal is to build a simple app that let us view <a href="https://github.com/">GitHub</a> user's information and, also, to manage our own message notes for every user.
+We will have a common layout with a static section (the one where you can search for users) and two subviews, having each one a different URL:</p>
+<ul>
+<li>Home page: will only contain a welcome message</li>
+<li>User profile page: will contain three sections for every user info group</li>
+</ul>
+<p>This is the home page:
+<img src="/content/images/2015/08/ractive-tutorial-03.png" alt="Home page">
+&lt;br&gt;</p>
+<p>This is the user page:
+<img src="/content/images/2015/07/ractive-tutorial-04.png" alt="User profile page"></p>
+<p>Our main layout will host the header and a dynamic section we will fill with the subsections depending on the URL and the user actions.</p>
+<p>So, the first thing is to create our main <em>html</em> layout.
+Open the <strong>index.html</strong> file and populate it with this content:</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+	&lt;head&gt;
+		&lt;meta charset=&quot;UTF-8&quot;&gt;
+		&lt;title&gt;Ractive Github notetaker&lt;/title&gt;
+		&lt;link rel=&quot;stylesheet&quot; href=&quot;./node_modules/bootstrap/dist/css/bootstrap.css&quot;&gt;
+	&lt;/head&gt;
+
+	&lt;body&gt;
+		&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+
+		&lt;script src=&quot;dist/js/app-bundle.js&quot;&gt;&lt;/script&gt;
+	&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>This basic <em>html</em> just loads <a href="http://getbootstrap.com/">bootstrap</a> for styling, creates an empty <em>div</em> where we will load our application content, and requests the <em>JS</em> bundle which will contains all of our magic code.</p>
+<p>The way Ractive works it that you create a new instance of its main object specifying the <em>html/handlebars</em> template it will need to deal with, the place in the document it will fills, and the data it must manage (and display). Of course, there are a lot of other properties you can initialize instances with, but keep this idea by now.</p>
+<p>Let's update our main <em>JS</em> file with a <em>Ractive</em> instance that will represent our application.
+<strong><em>root-folder</em>/app/js/app.js</strong>:</p>
+<pre><code class="language-language-javascript">import Ractive from 'ractive';
+
+let App = new Ractive({
+	  el: '#app',
+  template: '&lt;input type=&quot;text&quot; value=&quot;{{name}}&quot;&gt;&lt;p&gt;Name: {{name}}&lt;/p&gt;',
+  data: {
+	    name: 'Paquitosoft'
+  }
+});
+
+export default App;
+</code></pre>
+<p>Before we go any further, we must install our first production dependency: <a href="http://www.ractivejs.org/">Ractive.js</a></p>
+<pre><code class="language-language">$ npm install ractive --save
+</code></pre>
+<p>Now, if you re/start your server (<em>npm start</em>), you will see a blank page with an input and a label with a text.
+Note how changing the value from the input, the text besides de label gets updated.
+This is because <em>Ractive data binding</em>, implemented just by linking the value of the input to the <em>name</em> attribute of the Ractive instance <em>data</em>.</p>
+<p>If you've ever used <a href="https://github.com/janl/mustache.js">Mustache</a> or <a href="http://handlebarsjs.com/">Handlebars</a> before, <a href="http://docs.ractivejs.org/latest/templates"><em>Ractive</em> template system</a> is very similar. It's an extension of <em>Mustache</em> with some sugar to make your life easier.</p>
+<p>Notice the <strong>template</strong> attribute we're passing in the Ractive instance initialization. It holds the contents of the template for the purpose of this little example, but we want to have that template in its own file for better organization.</p>
+<p>Let's create a new folder for holding our templates and create the main application one.
+<strong><em>root-folder</em>/app/js/views/app.html</strong></p>
+<pre><code class="language-html">&lt;div class=&quot;main-container&quot;&gt;
+	&lt;nav class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;&gt;
+		&lt;div class=&quot;col-sm-1&quot;&gt;
+			&lt;a href=&quot;/&quot;&gt;
+				&lt;h3&gt;Notetaker&lt;/h3&gt;
+			&lt;/a&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;col-sm-7 col-sm-offset-1&quot; style=&quot;margin-top: 15px;&quot;&gt;
+            Here will be the search controls...
+		&lt;/div&gt;
+	&lt;/nav&gt;
+	&lt;div class=&quot;container&quot;&gt;
+        Here will be the main content of every route...
+	&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>In order to use this file in our application main file, we need to import it. But, as by default <em>webpack</em> interprets all dependencies as <em>JS</em>, we need to configure it to understand our templates are only text and it doesn't need to process them.
+We do this by configuring a new <em>webpack</em> loader which allows to simple import the files contents as they are (<a href="https://github.com/webpack/raw-loader">raw-plugin</a>).
+<strong><em>root-folder</em>/webpack.config.js</strong></p>
+<pre><code class="language-language-javascript">module.exports = {
+		entry: './app/js/app.js',
+	output: {
+			filename: './dist/js/app-bundle.js'
+	},
+	module: {
+			loaders: [
+				{
+					test: /\\.js$/,
+				exclude: /(node_modules|bower_components)/,
+				loader: 'babel'
+			},
+			{
+					test: /\\.html$/,
+				loader: 'raw'
+			}
+		]
+	}
+};
+</code></pre>
+<p>Now we import the template in the <em>app</em> file, re/start our main process (<em>npm start</em>) and check <a href="">http://localhost:8080</a>.
+<strong><em>root-folder</em>/app/js/app.js</strong>:</p>
+<pre><code class="language-language-javascript">import Ractive from 'ractive';
+import template from './views/app.html';
+
+let App = new Ractive({
+	  el: '#app',
+  template: template,
+  data: {
+	    name: 'Paquitosoft'
+  }
+});
+
+export default App;
+</code></pre>
+<p>&lt;br&gt;</p>
+<h2>Ractive components</h2>
+<p>On top of direct instances, Ractive allows us to use what they call <a href="http://docs.ractivejs.org/latest/components">Components</a>.
+The idea behind this kind of objects is to allow you to create encapsulated components very much like <a href="http://facebook.github.io/react/">React</a> does.
+Once you declare and register them (can be globally or per instance/component), you can use it inside your templates as new <em>html</em> entities.</p>
+<p>To demonstrate how they work, we will create a new component to encapsulate the search functionality.
+We begin by creating the template in a new file:
+<strong><em>root-folder</em>/app/views/search-user.html</strong></p>
+<pre><code class="language-html">&lt;div class=&quot;col-sm-12&quot;&gt;
+	&lt;form on-submit=&quot;searchUser&quot;&gt;
+		&lt;div class=&quot;form-group col-sm-7&quot;&gt;
+			&lt;input type=&quot;text&quot; class=&quot;form-control&quot; value=&quot;{{query}}&quot; autofocus placeholder=&quot;{{placeholder}}&quot;/&gt;
+		&lt;/div&gt;
+
+		&lt;div class=&quot;form-group col-sm-5&quot;&gt;
+			&lt;button type=&quot;submit&quot; class=&quot;btn btn-block btn-primary&quot;&gt;Search Github&lt;/button&gt;
+		&lt;/div&gt;
+	&lt;/form&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Let's comment this template a little bit...</p>
+<p>The <strong>on-submit</strong> attribute in the <em>form</em> tag is a <a href="http://docs.ractivejs.org/latest/events-overview">Ractive proxy event</a> declaration. Every time the user submits the form, the component managing this template will be notified (we'll see how to listen to that event in a moment).</p>
+<p>The <em>input</em> tag has a data binding value with the <strong>query</strong> component data attribute. <em>Ractive</em> will keep the sync. The same goes for the <strong>placeholder</strong>.
+While the first one is only used inside the component, we will provide the latter from the parent <em>App</em> instance just to show how you can share data between them.</p>
+<p>You must know that <em>components</em>, by defuault, inherit its parent data context. This search component will be used from the App main instance, meaning that App's data attributes are, by default, visible to the <em>search</em> component.
+Personally I don't like this kind of behavior by default as components get less reusable when they depend on some context not declared. I prefer to use them in <em>isolated</em> model, where they create an own data attributes context  which you can pass specific parameters.</p>
+<p>Let's create our component in a new file:
+<strong><em>root-folder</em>/app/js/components/layout/search-user.js</strong></p>
+<pre><code class="language-language-javascript">import Ractive from 'ractive';
+import Template from '../../../views/layout/search-user.html';
+
+var SearchGithub = Ractive.extend({
+		isolated: true,
+	template: Template,
+
+	oninit() {
+			this.on('searchUser', (rEvent) =&gt; {
+				rEvent.original.preventDefault();
+
+			let username = rEvent.context.query;
+			
+			console.log('This is the user you want to look up:', username);
+		});
+	},
+
+	data: {
+			query: ''
+	}
+});
+
+export default SearchGithub;
+</code></pre>
+<p>The way we create a <em>Ractive</em> component is by executing its <strong>extend</strong> function, passing the attributes which configure the component:</p>
+<ul>
+<li>isolated: We set this attribute to false so a new independent data context it's created for this component.</li>
+<li>temaplate: Set the template we previously declared.</li>
+<li>oninit: This function will be executed everytime the component gets initialized (Check <a href="http://docs.ractivejs.org/latest/lifecycle-events">this link</a> to review the info of all life-cycle events).</li>
+<li>data: Here we define the inner properties.</li>
+</ul>
+<p>Also, in our <em>oninit</em> handler we set up a listener for the <strong>on-submit</strong> event by listening to the custom event <strong>searchUser</strong>.
+The handler receives an extension of the native browser event enhanced with some useful information (check the <em>Event arguments</em> section of the <a href="http://docs.ractivejs.org/latest/proxy-events">proxy events</a> docs to see the details).
+We access the <em>original</em> property where we find the native browser event just to prevent default behavior. Note that you could also get this by returning <em>false</em> from this listener function, but that also stops event propagation.
+The <strong>context</strong> attribute for the event holds a data reference to the context where the event took place. In this case is the <em>input</em> tag, represented by an object with its data bindings.</p>
+<p>So now that we have our component set up, let's use it from the App.
+First we need to update the App markup:
+<strong><em>root-folder</em>/app/views/app.html</strong></p>
+<pre><code class="language-html">&lt;div class=&quot;main-container&quot;&gt;
+	&lt;nav class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;&gt;
+		&lt;div class=&quot;col-sm-1&quot;&gt;
+			&lt;a href=&quot;/&quot;&gt;
+				&lt;h3&gt;Notetaker&lt;/h3&gt;
+			&lt;/a&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;col-sm-7 col-sm-offset-1&quot; style=&quot;margin-top: 15px;&quot;&gt;
+			&lt;SearchUser placeholder=&quot;Type a GitHub username...&quot; /&gt;
+		&lt;/div&gt;
+	&lt;/nav&gt;
+	&lt;div class=&quot;container&quot;&gt;
+		Here will be the main content of every route...
+	&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Take note about how we're providing some data to the component by providing a tag attribute (<em>placeholder</em>).</p>
+<p>Second, we update our <em>App</em> instance to tell it to use the <em>search-user</em> component:
+<strong><em>root-folder</em>/app/js/app.js</strong></p>
+<pre><code class="language-language-javascript">import Ractive from 'ractive';
+import template from '../views/app.html';
+import SearchUserComponent from './components/layout/search-user';
+
+let App = new Ractive({
+	  el: '#app',
+  template: template,
+  components: {
+	  	SearchUser: SearchUserComponent
+  }
+});
+
+export default App;
+</code></pre>
+<p>We've just imported the <em>search-user</em> component and we set it as an <em>App</em> component using its <strong>components</strong> attributes. You just need to configure an object with the <em>components</em> you will use in your instance (or <em>component</em>) where the key is the name you will use for the <em>component</em> in the template and the value will be the <em>component class</em>.</p>
+<p>You can also register the components globally like this:</p>
+<pre><code class="language-language-javascript">Ractive.components.SearchUser = SearchUserComponent
+</code></pre>
+<p>The benefit is that all Ractive instances and <em>components</em> will <em>see</em> the component.
+The downside is that you loose visibility about which components your instance/component is using in the code.
+This is just a personal choice, and I prefer being specific.</p>
+<p>Ok, if you reload you browser now, you must see this picture:
+<img src="/content/images/2015/07/ractive-tutorial-05.png" alt=""></p>
+<p>The last step on this post is to also create a component for the main dynamic section representing the home page.
+We will do this for the sake of modularity and to get ready for the next post about routing.
+The template is very simple:
+<strong><em>root-folder</em>/app/views/home-page.html</strong></p>
+<pre><code class="language-html">&lt;h2 class=&quot;text-center&quot;&gt;
+	Search by Github username above
+&lt;/h2&gt;
+</code></pre>
+<p>The component is also trivial:
+<strong><em>root-folder</em>/app/js/components/home-page.js</strong></p>
+<pre><code class="language-language-javascript">import Ractive from 'ractive';
+import Template from '../../views/home-page.html';
+
+var HomePage = Ractive.extend({
+		template: Template
+});
+
+export default HomePage;
+</code></pre>
+<p>Now update App to use this new component:
+<strong><em>root-folder</em>/app/views/app.html</strong></p>
+<pre><code class="language-html">&lt;div class=&quot;main-container&quot;&gt;
+	&lt;nav class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;&gt;
+		&lt;div class=&quot;col-sm-1&quot;&gt;
+			&lt;a href=&quot;/&quot;&gt;
+				&lt;h3&gt;Notetaker&lt;/h3&gt;
+			&lt;/a&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;col-sm-7 col-sm-offset-1&quot; style=&quot;margin-top: 15px;&quot;&gt;
+			&lt;SearchUser placeholder=&quot;Type a GitHub username...&quot; /&gt;
+		&lt;/div&gt;
+	&lt;/nav&gt;
+	&lt;div class=&quot;container&quot;&gt;
+		&lt;HomePage /&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p><strong><em>root-folder</em>/app/js/app.js</strong></p>
+<pre><code class="language-language-javascript">import Ractive from 'ractive';
+import template from '../views/app.html';
+import SearchUserComponent from './components/layout/search-user';
+import HomePageComponent from './components/home-page';
+
+let App = new Ractive({
+	  el: '#app',
+  template: template,
+  components: {
+	  	SearchUser: SearchUserComponent,
+  	HomePage: HomePageComponent
+  }
+});
+
+export default App;
+</code></pre>
+<h2>Summary</h2>
+<ul>
+<li>We now know what we want to build.</li>
+<li>We created the main App instance using <em>Ractive</em>.</li>
+<li>We configured <a href="http://webpack.github.io/">webpack</a> to make it load our <em>html</em> templates.</li>
+<li>We got some insights about this library and how it works: what components are, how to configure data bindings, how to listen to DOM events and how to handle data contexts.</li>
+<li>We divided our little application in pieces both in terms of presentation (views) and behavior (components).</li>
+</ul>
+<hr>
+<p>You can check the source code in <a href="https://github.com/PaquitoSoft/notetaker-ractive">this GitHub repo</a>.</p>
+<hr>
+<p>Previous post: <a href="/post/ractive-js-tutorial-setting-up-your-environment">Setting up your environment</a>
+Next post: <a href="/post/ractive-js-tutorial-routing">Routing</a></p>
+<hr>
+</span></div><footer class="card_footer__5rntJ"><div>Published: <!-- -->28/07/2015</div></footer></article></div></section><aside><article class="about-me_aboutMeContainer__tBCGw"><header class="about-me_title__My_yA">About me</header><div><img class="about-me_avatar__rCHR2" src="/images/gravatar.jpg" alt="Paquitosoft avatar" height="150" width="150"/></div><footer class="about-me_footer__Io_kX"><ul><li class="about-me_profileLink__b1Ipw"><a href="https://github.com/PaquitoSoft" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"></path></svg></a></li><li class="about-me_profileLink__b1Ipw"><a href="https://twitter.com/telemaco82" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.79C20.33,8.6 20.33,8.42 20.32,8.23C21.16,7.63 21.88,6.87 22.46,6Z"></path></svg></a></li><li class="about-me_profileLink__b1Ipw"><a href="hhtps://www.linkedin.com/in/carlos-martínez-cortizas-81763b2b" target="_blank" rel="noreferrer"><svg class="" height="24" width="24" fill="inherit"><path d="M19 3A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H19M18.5 18.5V13.2A3.26 3.26 0 0 0 15.24 9.94C14.39 9.94 13.4 10.46 12.92 11.24V10.13H10.13V18.5H12.92V13.57C12.92 12.8 13.54 12.17 14.31 12.17A1.4 1.4 0 0 1 15.71 13.57V18.5H18.5M6.88 8.56A1.68 1.68 0 0 0 8.56 6.88C8.56 5.95 7.81 5.19 6.88 5.19A1.69 1.69 0 0 0 5.19 6.88C5.19 7.81 5.95 8.56 6.88 8.56M8.27 18.5V10.13H5.5V18.5H8.27Z"></path></svg></a></li></ul></footer></article></aside></div></main><footer class="footer_footer__GaW5f">Developed using<a href="https://nextjs.org" target="_blank" rel="noreferrer">Next.js</a> and<a href="https://picocss.com/" target="_blank" rel="noreferrer">PicoCSS</a></footer></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"post":{"slug":"ractive-js-tutorial-creating-the-barebones","title":"Ractive.js tutorial - Creating the barebones (2 of 6)","creationDate":"2015-07-28T20:35:02.558Z","keywords":"tutorial, javascript, ractive, ractivejs","status":"published","excerpt":"\u003cp\u003e(\u003cem\u003ePrevious step\u003c/em\u003e: \u003ca href=\"/post/ractive-js-tutorial-setting-up-your-environment/\"\u003eSetting up your environment\u003c/a\u003e)\u003c/p\u003e\n\u003cp\u003eOk, so now that you have all ready to fly, let's check what we want to do.\u003c/p\u003e\n\u003cp\u003eThe goal is to build a simple app that let us view \u003ca href=\"https://github.com/\"\u003eGitHub\u003c/a\u003e user's information and, also, to manage our own message notes for every user.\nWe will have a common layout with a static section (the one where you can search for users) and two subviews, having each one a different URL:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eHome page: will only contain a welcome message\u003c/li\u003e\n\u003cli\u003eUser profile page: will contain three sections for every user info group\u003c/li\u003e\n\u003c/ul\u003e\n","content":"\u003cp\u003e(\u003cem\u003ePrevious step\u003c/em\u003e: \u003ca href=\"/post/ractive-js-tutorial-setting-up-your-environment/\"\u003eSetting up your environment\u003c/a\u003e)\u003c/p\u003e\n\u003cp\u003eOk, so now that you have all ready to fly, let's check what we want to do.\u003c/p\u003e\n\u003cp\u003eThe goal is to build a simple app that let us view \u003ca href=\"https://github.com/\"\u003eGitHub\u003c/a\u003e user's information and, also, to manage our own message notes for every user.\nWe will have a common layout with a static section (the one where you can search for users) and two subviews, having each one a different URL:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eHome page: will only contain a welcome message\u003c/li\u003e\n\u003cli\u003eUser profile page: will contain three sections for every user info group\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThis is the home page:\n\u003cimg src=\"/content/images/2015/08/ractive-tutorial-03.png\" alt=\"Home page\"\u003e\n\u0026lt;br\u0026gt;\u003c/p\u003e\n\u003cp\u003eThis is the user page:\n\u003cimg src=\"/content/images/2015/07/ractive-tutorial-04.png\" alt=\"User profile page\"\u003e\u003c/p\u003e\n\u003cp\u003eOur main layout will host the header and a dynamic section we will fill with the subsections depending on the URL and the user actions.\u003c/p\u003e\n\u003cp\u003eSo, the first thing is to create our main \u003cem\u003ehtml\u003c/em\u003e layout.\nOpen the \u003cstrong\u003eindex.html\u003c/strong\u003e file and populate it with this content:\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;!DOCTYPE html\u0026gt;\n\u0026lt;html\u0026gt;\n\t\u0026lt;head\u0026gt;\n\t\t\u0026lt;meta charset=\u0026quot;UTF-8\u0026quot;\u0026gt;\n\t\t\u0026lt;title\u0026gt;Ractive Github notetaker\u0026lt;/title\u0026gt;\n\t\t\u0026lt;link rel=\u0026quot;stylesheet\u0026quot; href=\u0026quot;./node_modules/bootstrap/dist/css/bootstrap.css\u0026quot;\u0026gt;\n\t\u0026lt;/head\u0026gt;\n\n\t\u0026lt;body\u0026gt;\n\t\t\u0026lt;div id=\u0026quot;app\u0026quot;\u0026gt;\u0026lt;/div\u0026gt;\n\n\t\t\u0026lt;script src=\u0026quot;dist/js/app-bundle.js\u0026quot;\u0026gt;\u0026lt;/script\u0026gt;\n\t\u0026lt;/body\u0026gt;\n\u0026lt;/html\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThis basic \u003cem\u003ehtml\u003c/em\u003e just loads \u003ca href=\"http://getbootstrap.com/\"\u003ebootstrap\u003c/a\u003e for styling, creates an empty \u003cem\u003ediv\u003c/em\u003e where we will load our application content, and requests the \u003cem\u003eJS\u003c/em\u003e bundle which will contains all of our magic code.\u003c/p\u003e\n\u003cp\u003eThe way Ractive works it that you create a new instance of its main object specifying the \u003cem\u003ehtml/handlebars\u003c/em\u003e template it will need to deal with, the place in the document it will fills, and the data it must manage (and display). Of course, there are a lot of other properties you can initialize instances with, but keep this idea by now.\u003c/p\u003e\n\u003cp\u003eLet's update our main \u003cem\u003eJS\u003c/em\u003e file with a \u003cem\u003eRactive\u003c/em\u003e instance that will represent our application.\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/app.js\u003c/strong\u003e:\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language-javascript\"\u003eimport Ractive from 'ractive';\n\nlet App = new Ractive({\n\t  el: '#app',\n  template: '\u0026lt;input type=\u0026quot;text\u0026quot; value=\u0026quot;{{name}}\u0026quot;\u0026gt;\u0026lt;p\u0026gt;Name: {{name}}\u0026lt;/p\u0026gt;',\n  data: {\n\t    name: 'Paquitosoft'\n  }\n});\n\nexport default App;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eBefore we go any further, we must install our first production dependency: \u003ca href=\"http://www.ractivejs.org/\"\u003eRactive.js\u003c/a\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language\"\u003e$ npm install ractive --save\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eNow, if you re/start your server (\u003cem\u003enpm start\u003c/em\u003e), you will see a blank page with an input and a label with a text.\nNote how changing the value from the input, the text besides de label gets updated.\nThis is because \u003cem\u003eRactive data binding\u003c/em\u003e, implemented just by linking the value of the input to the \u003cem\u003ename\u003c/em\u003e attribute of the Ractive instance \u003cem\u003edata\u003c/em\u003e.\u003c/p\u003e\n\u003cp\u003eIf you've ever used \u003ca href=\"https://github.com/janl/mustache.js\"\u003eMustache\u003c/a\u003e or \u003ca href=\"http://handlebarsjs.com/\"\u003eHandlebars\u003c/a\u003e before, \u003ca href=\"http://docs.ractivejs.org/latest/templates\"\u003e\u003cem\u003eRactive\u003c/em\u003e template system\u003c/a\u003e is very similar. It's an extension of \u003cem\u003eMustache\u003c/em\u003e with some sugar to make your life easier.\u003c/p\u003e\n\u003cp\u003eNotice the \u003cstrong\u003etemplate\u003c/strong\u003e attribute we're passing in the Ractive instance initialization. It holds the contents of the template for the purpose of this little example, but we want to have that template in its own file for better organization.\u003c/p\u003e\n\u003cp\u003eLet's create a new folder for holding our templates and create the main application one.\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/views/app.html\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;div class=\u0026quot;main-container\u0026quot;\u0026gt;\n\t\u0026lt;nav class=\u0026quot;navbar navbar-default\u0026quot; role=\u0026quot;navigation\u0026quot;\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;col-sm-1\u0026quot;\u0026gt;\n\t\t\t\u0026lt;a href=\u0026quot;/\u0026quot;\u0026gt;\n\t\t\t\t\u0026lt;h3\u0026gt;Notetaker\u0026lt;/h3\u0026gt;\n\t\t\t\u0026lt;/a\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;col-sm-7 col-sm-offset-1\u0026quot; style=\u0026quot;margin-top: 15px;\u0026quot;\u0026gt;\n            Here will be the search controls...\n\t\t\u0026lt;/div\u0026gt;\n\t\u0026lt;/nav\u0026gt;\n\t\u0026lt;div class=\u0026quot;container\u0026quot;\u0026gt;\n        Here will be the main content of every route...\n\t\u0026lt;/div\u0026gt;\n\u0026lt;/div\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eIn order to use this file in our application main file, we need to import it. But, as by default \u003cem\u003ewebpack\u003c/em\u003e interprets all dependencies as \u003cem\u003eJS\u003c/em\u003e, we need to configure it to understand our templates are only text and it doesn't need to process them.\nWe do this by configuring a new \u003cem\u003ewebpack\u003c/em\u003e loader which allows to simple import the files contents as they are (\u003ca href=\"https://github.com/webpack/raw-loader\"\u003eraw-plugin\u003c/a\u003e).\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/webpack.config.js\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language-javascript\"\u003emodule.exports = {\n\t\tentry: './app/js/app.js',\n\toutput: {\n\t\t\tfilename: './dist/js/app-bundle.js'\n\t},\n\tmodule: {\n\t\t\tloaders: [\n\t\t\t\t{\n\t\t\t\t\ttest: /\\\\.js$/,\n\t\t\t\texclude: /(node_modules|bower_components)/,\n\t\t\t\tloader: 'babel'\n\t\t\t},\n\t\t\t{\n\t\t\t\t\ttest: /\\\\.html$/,\n\t\t\t\tloader: 'raw'\n\t\t\t}\n\t\t]\n\t}\n};\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eNow we import the template in the \u003cem\u003eapp\u003c/em\u003e file, re/start our main process (\u003cem\u003enpm start\u003c/em\u003e) and check \u003ca href=\"\"\u003ehttp://localhost:8080\u003c/a\u003e.\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/app.js\u003c/strong\u003e:\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language-javascript\"\u003eimport Ractive from 'ractive';\nimport template from './views/app.html';\n\nlet App = new Ractive({\n\t  el: '#app',\n  template: template,\n  data: {\n\t    name: 'Paquitosoft'\n  }\n});\n\nexport default App;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e\u0026lt;br\u0026gt;\u003c/p\u003e\n\u003ch2\u003eRactive components\u003c/h2\u003e\n\u003cp\u003eOn top of direct instances, Ractive allows us to use what they call \u003ca href=\"http://docs.ractivejs.org/latest/components\"\u003eComponents\u003c/a\u003e.\nThe idea behind this kind of objects is to allow you to create encapsulated components very much like \u003ca href=\"http://facebook.github.io/react/\"\u003eReact\u003c/a\u003e does.\nOnce you declare and register them (can be globally or per instance/component), you can use it inside your templates as new \u003cem\u003ehtml\u003c/em\u003e entities.\u003c/p\u003e\n\u003cp\u003eTo demonstrate how they work, we will create a new component to encapsulate the search functionality.\nWe begin by creating the template in a new file:\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/views/search-user.html\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;div class=\u0026quot;col-sm-12\u0026quot;\u0026gt;\n\t\u0026lt;form on-submit=\u0026quot;searchUser\u0026quot;\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;form-group col-sm-7\u0026quot;\u0026gt;\n\t\t\t\u0026lt;input type=\u0026quot;text\u0026quot; class=\u0026quot;form-control\u0026quot; value=\u0026quot;{{query}}\u0026quot; autofocus placeholder=\u0026quot;{{placeholder}}\u0026quot;/\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\n\t\t\u0026lt;div class=\u0026quot;form-group col-sm-5\u0026quot;\u0026gt;\n\t\t\t\u0026lt;button type=\u0026quot;submit\u0026quot; class=\u0026quot;btn btn-block btn-primary\u0026quot;\u0026gt;Search Github\u0026lt;/button\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\t\u0026lt;/form\u0026gt;\n\u0026lt;/div\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eLet's comment this template a little bit...\u003c/p\u003e\n\u003cp\u003eThe \u003cstrong\u003eon-submit\u003c/strong\u003e attribute in the \u003cem\u003eform\u003c/em\u003e tag is a \u003ca href=\"http://docs.ractivejs.org/latest/events-overview\"\u003eRactive proxy event\u003c/a\u003e declaration. Every time the user submits the form, the component managing this template will be notified (we'll see how to listen to that event in a moment).\u003c/p\u003e\n\u003cp\u003eThe \u003cem\u003einput\u003c/em\u003e tag has a data binding value with the \u003cstrong\u003equery\u003c/strong\u003e component data attribute. \u003cem\u003eRactive\u003c/em\u003e will keep the sync. The same goes for the \u003cstrong\u003eplaceholder\u003c/strong\u003e.\nWhile the first one is only used inside the component, we will provide the latter from the parent \u003cem\u003eApp\u003c/em\u003e instance just to show how you can share data between them.\u003c/p\u003e\n\u003cp\u003eYou must know that \u003cem\u003ecomponents\u003c/em\u003e, by defuault, inherit its parent data context. This search component will be used from the App main instance, meaning that App's data attributes are, by default, visible to the \u003cem\u003esearch\u003c/em\u003e component.\nPersonally I don't like this kind of behavior by default as components get less reusable when they depend on some context not declared. I prefer to use them in \u003cem\u003eisolated\u003c/em\u003e model, where they create an own data attributes context  which you can pass specific parameters.\u003c/p\u003e\n\u003cp\u003eLet's create our component in a new file:\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/components/layout/search-user.js\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language-javascript\"\u003eimport Ractive from 'ractive';\nimport Template from '../../../views/layout/search-user.html';\n\nvar SearchGithub = Ractive.extend({\n\t\tisolated: true,\n\ttemplate: Template,\n\n\toninit() {\n\t\t\tthis.on('searchUser', (rEvent) =\u0026gt; {\n\t\t\t\trEvent.original.preventDefault();\n\n\t\t\tlet username = rEvent.context.query;\n\t\t\t\n\t\t\tconsole.log('This is the user you want to look up:', username);\n\t\t});\n\t},\n\n\tdata: {\n\t\t\tquery: ''\n\t}\n});\n\nexport default SearchGithub;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThe way we create a \u003cem\u003eRactive\u003c/em\u003e component is by executing its \u003cstrong\u003eextend\u003c/strong\u003e function, passing the attributes which configure the component:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eisolated: We set this attribute to false so a new independent data context it's created for this component.\u003c/li\u003e\n\u003cli\u003etemaplate: Set the template we previously declared.\u003c/li\u003e\n\u003cli\u003eoninit: This function will be executed everytime the component gets initialized (Check \u003ca href=\"http://docs.ractivejs.org/latest/lifecycle-events\"\u003ethis link\u003c/a\u003e to review the info of all life-cycle events).\u003c/li\u003e\n\u003cli\u003edata: Here we define the inner properties.\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eAlso, in our \u003cem\u003eoninit\u003c/em\u003e handler we set up a listener for the \u003cstrong\u003eon-submit\u003c/strong\u003e event by listening to the custom event \u003cstrong\u003esearchUser\u003c/strong\u003e.\nThe handler receives an extension of the native browser event enhanced with some useful information (check the \u003cem\u003eEvent arguments\u003c/em\u003e section of the \u003ca href=\"http://docs.ractivejs.org/latest/proxy-events\"\u003eproxy events\u003c/a\u003e docs to see the details).\nWe access the \u003cem\u003eoriginal\u003c/em\u003e property where we find the native browser event just to prevent default behavior. Note that you could also get this by returning \u003cem\u003efalse\u003c/em\u003e from this listener function, but that also stops event propagation.\nThe \u003cstrong\u003econtext\u003c/strong\u003e attribute for the event holds a data reference to the context where the event took place. In this case is the \u003cem\u003einput\u003c/em\u003e tag, represented by an object with its data bindings.\u003c/p\u003e\n\u003cp\u003eSo now that we have our component set up, let's use it from the App.\nFirst we need to update the App markup:\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/views/app.html\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;div class=\u0026quot;main-container\u0026quot;\u0026gt;\n\t\u0026lt;nav class=\u0026quot;navbar navbar-default\u0026quot; role=\u0026quot;navigation\u0026quot;\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;col-sm-1\u0026quot;\u0026gt;\n\t\t\t\u0026lt;a href=\u0026quot;/\u0026quot;\u0026gt;\n\t\t\t\t\u0026lt;h3\u0026gt;Notetaker\u0026lt;/h3\u0026gt;\n\t\t\t\u0026lt;/a\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;col-sm-7 col-sm-offset-1\u0026quot; style=\u0026quot;margin-top: 15px;\u0026quot;\u0026gt;\n\t\t\t\u0026lt;SearchUser placeholder=\u0026quot;Type a GitHub username...\u0026quot; /\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\t\u0026lt;/nav\u0026gt;\n\t\u0026lt;div class=\u0026quot;container\u0026quot;\u0026gt;\n\t\tHere will be the main content of every route...\n\t\u0026lt;/div\u0026gt;\n\u0026lt;/div\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eTake note about how we're providing some data to the component by providing a tag attribute (\u003cem\u003eplaceholder\u003c/em\u003e).\u003c/p\u003e\n\u003cp\u003eSecond, we update our \u003cem\u003eApp\u003c/em\u003e instance to tell it to use the \u003cem\u003esearch-user\u003c/em\u003e component:\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/app.js\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language-javascript\"\u003eimport Ractive from 'ractive';\nimport template from '../views/app.html';\nimport SearchUserComponent from './components/layout/search-user';\n\nlet App = new Ractive({\n\t  el: '#app',\n  template: template,\n  components: {\n\t  \tSearchUser: SearchUserComponent\n  }\n});\n\nexport default App;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eWe've just imported the \u003cem\u003esearch-user\u003c/em\u003e component and we set it as an \u003cem\u003eApp\u003c/em\u003e component using its \u003cstrong\u003ecomponents\u003c/strong\u003e attributes. You just need to configure an object with the \u003cem\u003ecomponents\u003c/em\u003e you will use in your instance (or \u003cem\u003ecomponent\u003c/em\u003e) where the key is the name you will use for the \u003cem\u003ecomponent\u003c/em\u003e in the template and the value will be the \u003cem\u003ecomponent class\u003c/em\u003e.\u003c/p\u003e\n\u003cp\u003eYou can also register the components globally like this:\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language-javascript\"\u003eRactive.components.SearchUser = SearchUserComponent\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThe benefit is that all Ractive instances and \u003cem\u003ecomponents\u003c/em\u003e will \u003cem\u003esee\u003c/em\u003e the component.\nThe downside is that you loose visibility about which components your instance/component is using in the code.\nThis is just a personal choice, and I prefer being specific.\u003c/p\u003e\n\u003cp\u003eOk, if you reload you browser now, you must see this picture:\n\u003cimg src=\"/content/images/2015/07/ractive-tutorial-05.png\" alt=\"\"\u003e\u003c/p\u003e\n\u003cp\u003eThe last step on this post is to also create a component for the main dynamic section representing the home page.\nWe will do this for the sake of modularity and to get ready for the next post about routing.\nThe template is very simple:\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/views/home-page.html\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;h2 class=\u0026quot;text-center\u0026quot;\u0026gt;\n\tSearch by Github username above\n\u0026lt;/h2\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThe component is also trivial:\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/components/home-page.js\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language-javascript\"\u003eimport Ractive from 'ractive';\nimport Template from '../../views/home-page.html';\n\nvar HomePage = Ractive.extend({\n\t\ttemplate: Template\n});\n\nexport default HomePage;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eNow update App to use this new component:\n\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/views/app.html\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-html\"\u003e\u0026lt;div class=\u0026quot;main-container\u0026quot;\u0026gt;\n\t\u0026lt;nav class=\u0026quot;navbar navbar-default\u0026quot; role=\u0026quot;navigation\u0026quot;\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;col-sm-1\u0026quot;\u0026gt;\n\t\t\t\u0026lt;a href=\u0026quot;/\u0026quot;\u0026gt;\n\t\t\t\t\u0026lt;h3\u0026gt;Notetaker\u0026lt;/h3\u0026gt;\n\t\t\t\u0026lt;/a\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\t\t\u0026lt;div class=\u0026quot;col-sm-7 col-sm-offset-1\u0026quot; style=\u0026quot;margin-top: 15px;\u0026quot;\u0026gt;\n\t\t\t\u0026lt;SearchUser placeholder=\u0026quot;Type a GitHub username...\u0026quot; /\u0026gt;\n\t\t\u0026lt;/div\u0026gt;\n\t\u0026lt;/nav\u0026gt;\n\t\u0026lt;div class=\u0026quot;container\u0026quot;\u0026gt;\n\t\t\u0026lt;HomePage /\u0026gt;\n\t\u0026lt;/div\u0026gt;\n\u0026lt;/div\u0026gt;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e\u003cstrong\u003e\u003cem\u003eroot-folder\u003c/em\u003e/app/js/app.js\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-language-javascript\"\u003eimport Ractive from 'ractive';\nimport template from '../views/app.html';\nimport SearchUserComponent from './components/layout/search-user';\nimport HomePageComponent from './components/home-page';\n\nlet App = new Ractive({\n\t  el: '#app',\n  template: template,\n  components: {\n\t  \tSearchUser: SearchUserComponent,\n  \tHomePage: HomePageComponent\n  }\n});\n\nexport default App;\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch2\u003eSummary\u003c/h2\u003e\n\u003cul\u003e\n\u003cli\u003eWe now know what we want to build.\u003c/li\u003e\n\u003cli\u003eWe created the main App instance using \u003cem\u003eRactive\u003c/em\u003e.\u003c/li\u003e\n\u003cli\u003eWe configured \u003ca href=\"http://webpack.github.io/\"\u003ewebpack\u003c/a\u003e to make it load our \u003cem\u003ehtml\u003c/em\u003e templates.\u003c/li\u003e\n\u003cli\u003eWe got some insights about this library and how it works: what components are, how to configure data bindings, how to listen to DOM events and how to handle data contexts.\u003c/li\u003e\n\u003cli\u003eWe divided our little application in pieces both in terms of presentation (views) and behavior (components).\u003c/li\u003e\n\u003c/ul\u003e\n\u003chr\u003e\n\u003cp\u003eYou can check the source code in \u003ca href=\"https://github.com/PaquitoSoft/notetaker-ractive\"\u003ethis GitHub repo\u003c/a\u003e.\u003c/p\u003e\n\u003chr\u003e\n\u003cp\u003ePrevious post: \u003ca href=\"/post/ractive-js-tutorial-setting-up-your-environment\"\u003eSetting up your environment\u003c/a\u003e\nNext post: \u003ca href=\"/post/ractive-js-tutorial-routing\"\u003eRouting\u003c/a\u003e\u003c/p\u003e\n\u003chr\u003e\n"},"_superjson":{"values":{"post.creationDate":["Date"]}}},"__N_SSG":true},"page":"/post/[slug]","query":{"slug":"ractive-js-tutorial-creating-the-barebones"},"buildId":"qDqkLNkeIvmmotP5mIhnk","isFallback":false,"gsp":true,"scriptLoader":[]}</script></body></html>
