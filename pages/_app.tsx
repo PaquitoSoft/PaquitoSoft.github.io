@@ -11,7 +11,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 	return (
 		<>
 			<Header />
-			<main className="container">
+			<main className="container main-content">
 				<div className="grid">
 					<section>
 						<Component {...pageProps} />

@@ -1,0 +1,19 @@
+.postSummary header {
+	margin-bottom: 20px;
+}
+
+.title {
+	background-color: var(--titleBackgroundColor);
+	color: var(--titleForegroundColor);
+	padding: 10px 20px;	
+}
+
+.title h3 {
+	color: var(--titleForegroundColor);
+	margin-bottom: 0;	
+}
+
+.postSummary footer {
+	margin-top: 20px;
+	padding: 20px;
+}

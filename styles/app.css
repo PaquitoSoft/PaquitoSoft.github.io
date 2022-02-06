@@ -1,90 +1,49 @@
-/* Global CSS variables */
-/* :root {
-	--spacing-company: 3rem;
-	--font-weight: 400;
-	--border-radius: 0;
-} */
-
 :root {
 	--titleBackgroundColor: #2d3542;
 	--titleForegroundColor: #fff;
 	--font-size-s: 12px;
 }
 
-/* @media (min-width: 576px) {
-	:root {
-		--font-size: 17px;
-	}
-}
-@media (min-width: 768px) {
-	:root {
-		--font-size: 18px;
-	}
-}
-@media (min-width: 992px) {
-	:root {
-		--font-size: 19px;
-	}
-}
-@media (min-width: 1200px) {
-	:root {
-		--font-size: 20px;
-	}
-} */
-
-/* Typography */
-/* h2,
-h3,
-hgroup > :last-child {
-	font-weight: 200;
+h1 a:active, h1 a:focus, h1 a:hover,
+h2 a:active, h2 a:focus, h2 a:hover,
+h3 a:active, h3 a:focus, h3 a:hover
+{
+	--color: var(--titleForegroundColor);
 }
 
-small {
-	color: var(--muted-color);
-} */
 
-/* Header */
-/* .hero {
-	background-color: #394046;
-	background-image: url("https://source.unsplash.com/DNQ-M93tHmA/3000x1000");
-	background-position: center;
-	background-size: cover;
-}
-
-header {
-	padding: var(--spacing-company) 0;
-}
-
-header hgroup > :last-child {
-	color: var(--h3-color);
-}
-
-header hgroup {
-	margin-bottom: var(--spacing-company);
-} */
-
-/* Main */
-main {
-	padding-top: 75px;
+.main-content {
+	padding-top: 90px;
 }
 
 @media (min-width: 992px) {
-	main .grid {
+	.main-content .grid {
 		grid-column-gap: 3rem;
 		grid-template-columns: auto 25%;
 	}
 }
 
-/* form.grid {
-	grid-row-gap: 0;
-} */
-
-/* Aside nav */
-/* aside img {
-	margin-bottom: 0.25rem;
+@media (min-width: 576px) {
+    .main-content {
+        max-width: 576px;
+    }
 }
 
-aside p {
-	margin-bottom: var(--spacing-company);
-	line-height: 1.25;
-} */
+@media (min-width: 768px) {
+    .main-content {
+        max-width: 768px;
+		padding-top: 120px;
+    }
+}
+
+@media (min-width: 992px) {
+    .main-content {
+        max-width: 992px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .main-content {
+        max-width: 1200px;
+    }
+}

@@ -21,17 +21,17 @@ function AboutMe() {
 			<footer className={styles.footer}>
 				<ul>
 					<li className={styles.profileLink}>
-						<a href="/" target="_blank" rel="noreferrer">
+						<a href="https://github.com/PaquitoSoft" target="_blank" rel="noreferrer">
 							<GitHubIcon />
 						</a>
 					</li>
 					<li className={styles.profileLink}>
-						<a href="/" target="_blank" rel="noreferrer">
+						<a href="https://twitter.com/telemaco82" target="_blank" rel="noreferrer">
 							<TwitterIcon />
 						</a>
 					</li>
 					<li className={styles.profileLink}>
-						<a href="/" target="_blank" rel="noreferrer">
+						<a href="hhtps://www.linkedin.com/in/carlos-martínez-cortizas-81763b2b" target="_blank" rel="noreferrer">
 							<LinkedInIcon />
 						</a>
 					</li>

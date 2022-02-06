@@ -1,8 +1,8 @@
 ---
-title: 'Create a Ractive.js application (0 of 6)'
-creationDate: '2015-07-26T16:15:37.214Z'
+title: "Create a Ractive.js application (0 of 6)"
+creationDate: "2015-07-26T16:15:37.214Z"
 keywords: tutorial, javascript, ractive, ractivejs
-status: 'published'
+status: published
 ---
 
 I'm a big fan of javascript. I like it in the front-end and I love it in the back-end (thanks [Ryan Dhal](http://www.quora.com/Who-is-Ryan-Dahl)).
@@ -16,6 +16,8 @@ IMHO it's a very easy to learn and powerful tool for dealing with DOM automatic 
 
 I began working in a prototype of our project using this tool and I was also surprised about the speed yur can get in terms of development. 
 The way this library solves some common problems is very natural for me, it fits my mindset. And every time I needed to learn how to implement something, it was pretty straightforward to find out.
+
+<!-- more -->
 
 We finally didn't use _Ractive.JS_ in our project as we found some issues regarding server-side _html_ rendering we couldn't solve ([more  info](https://github.com/ractivejs/ractive/issues/1648)) and I can tell you it was a hard decision to drop it.
 
@@ -37,9 +39,9 @@ You can find the final code for this tutorial at [GitHub](https://github.com/Paq
 
 ## Summary
 These are the links for the different steps of the tutorial:
-1. [Setting up your environmet](/ractive-js-tutorial-setting-up-your-environment)
-2. [Creating the barebones](/ractive-js-tutorial-creating-the-barebones)
-3. [Routing](/ractive-js-tutorial-routing)
-4. [Loading user info (GitHub)](/ractive-js-tutorial-loading-user-info)
-5. [Managing user's notes (Firebase)](/ractive-js-tutorial-managing-users-notes)
-6. [The final touch](/ractive-js-tutorial-the-final-touch)
+1. [Setting up your environmet](/post/ractive-js-tutorial-setting-up-your-environment)
+2. [Creating the barebones](/post/ractive-js-tutorial-creating-the-barebones)
+3. [Routing](/post/ractive-js-tutorial-routing)
+4. [Loading user info (GitHub)](/post/ractive-js-tutorial-loading-user-info)
+5. [Managing user's notes (Firebase)](/post/ractive-js-tutorial-managing-users-notes)
+6. [The final touch](/post/ractive-js-tutorial-the-final-touch)

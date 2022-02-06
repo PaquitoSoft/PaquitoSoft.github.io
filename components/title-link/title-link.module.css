@@ -1,0 +1,15 @@
+a.titleLink {
+	--color: var(--titleForegroundColor);
+	display: inline-block;
+	color: var(--titleForegroundColor);
+}
+
+a.titleLink:focus, a.titleLink:active {
+	--background-color: #0000;
+	--text-decoration: none;
+}
+
+.titleLink h2, .titleLink h3 {
+	margin: 0;
+	color: var(--titleForegroundColor);
+}

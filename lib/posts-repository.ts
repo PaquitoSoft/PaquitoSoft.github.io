@@ -5,42 +5,36 @@ import MarkdownIt from 'markdown-it';
 import Post from '../types/post';
 
 const POSTS_DIRECTORY_PATH = './resources';
-const md = new MarkdownIt();
+const POST_EXCERPT_MARK = '<!-- more -->';
+const md = new MarkdownIt({ html: false });
 
 export async function getAllPosts(): Promise<Post[]> {
-	// const postsDirectoryPath = join(__dirname, POSTS_DIRECTORY_PATH);
 	const postsDirectoryPath = resolve(POSTS_DIRECTORY_PATH);
 	const files = await readdir(postsDirectoryPath);
 	const mdFiles = files.filter(file => file.endsWith('.md'));
-	const md = new MarkdownIt();
-	const postsMetadata = await Promise.all(mdFiles.map(async file => {
-		// const filePath = `${POSTS_DIRECTORY_PATH}/${file}`;
-		// const fileContent = await readFile(filePath, 'utf8');
-		// const meta = loadFront(fileContent);
-		// return {
-		// 	slug: file.replace('.md', ''),
-		// 	title: meta.title,
-		// 	creationDate: new Date(meta.creationDate),
-		// 	status: meta.status,
-		// 	content: md.render(meta.__content),
-		// };
+	const posts = await Promise.all(mdFiles.map(async file => {
 		const post = await getPost(file.replace('.md', ''));
 		return post;
 	}));
 	
-	return postsMetadata;
+	posts.sort((a, b) => b.creationDate.getTime() - a.creationDate.getTime());
+	
+	return posts;
 }
 
 export async function getPost(slug: string): Promise<Post> {
-	// const postFilePath = `${POSTS_DIRECTORY_PATH}/${slug}.md`;
 	const postFilePath = resolve(join(POSTS_DIRECTORY_PATH, `${slug}.md`));
 	const fileContent = await readFile(postFilePath, 'utf8');
 	const meta = loadFront(fileContent);
+	const [summary, rest] = meta.__content.split(POST_EXCERPT_MARK);
+
 	return {
 		slug,
 		title: meta.title,
 		creationDate: new Date(meta.creationDate),
+		keywords: meta.keywords,
 		status: meta.status,
-		content: md.render(meta.__content),
+		excerpt: md.render(summary),
+		content: md.render([summary, rest].join(''))
 	};
 }

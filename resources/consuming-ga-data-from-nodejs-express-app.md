@@ -1,6 +1,6 @@
 ---
-title: Consuming GA data from NodeJS Express app
-creationDate: '2013-12-01T21:43:41.405Z'
+title: "Consuming GA data from NodeJS Express app"
+creationDate: "2013-12-01T21:43:41.405Z"
 keywords: nodejs, express, google, analytics, ga, development
 status: published
 ---
@@ -26,43 +26,32 @@ These are the main steps I had to take:
 
 First of all you need to sign in into [Google API console center](https://code.google.com/apis/console) and register a new project. Once you create it (you just need to fill the project name), you should select the _Services_ link in the left vertical menu. Here you can set what Google services your project will need access to. So we click on the _Analytics API_ switch button to activate this permission.
 
-<a href=\"https://picasaweb.google.com/lh/photo/qYvZbYqFps0m8fXbQZfnvdMTjNZETYmyPJy0liipFm0?feat=directlink\" title=\"Register a new application in Google API console\">
-  <img src=\"https://lh3.googleusercontent.com/-H2ECcOC-KTk/UN-DZCZzGSI/AAAAAAAAABY/zY0RlFoWPcI/s912/register_google_api_console.jpg\" style=\"width:100%;\">
-</a>
+![Register a new application in Google API console](https://lh3.googleusercontent.com/-H2ECcOC-KTk/UN-DZCZzGSI/AAAAAAAAABY/zY0RlFoWPcI/s912/register_google_api_console.jpg)
 
 ## Create a service account
 
 Next we need to create the service account.  
 In the left vertical menu you should click in the *API Access* link. You should see a big blue button saying *Create an OAuth Client ID...*. 
 
-<a href=\"https://picasaweb.google.com/lh/photo/9TFInAiGtb4MI0I2BiRXoNMTjNZETYmyPJy0liipFm0?feat=directlink\" title=\"Create service account (step 1)\">
-  <img src=\"https://lh6.googleusercontent.com/-g7qvSvt3DPQ/UOasmIB_xzI/AAAAAAAAABo/e400jAuaMtA/s912/create_service_account_1.jpg\" style=\"width:100%;\">
-</a>
+![Create service account (step 1)](https://lh6.googleusercontent.com/-g7qvSvt3DPQ/UOasmIB_xzI/AAAAAAAAABo/e400jAuaMtA/s912/create_service_account_1.jpg)
 
 Click there and you will be presented a popup to fill some info about the app that will be using the Google service. Fill the project name at least.
 
-<a href=\"https://picasaweb.google.com/lh/photo/MrUxOw4BM1UdG4ZsOb8Pe9MTjNZETYmyPJy0liipFm0?feat=directlink\" title=\"Create service account (step 2)\">
-  <img src=\"https://lh4.googleusercontent.com/-E_3Cq9o3cBk/UOasm4j6JRI/AAAAAAAAABw/-TZqTHHQTY8/s912/create_service_account_2.jpg\" style=\"width:100%;\">
-</a>
+![Create service account (step 2)](https://lh4.googleusercontent.com/-E_3Cq9o3cBk/UOasm4j6JRI/AAAAAAAAABw/-TZqTHHQTY8/s912/create_service_account_2.jpg)
 
 Now you will get to a second step (inside the popup) where you need to choose you want to create a *service account*.
 
-<a href=\"https://picasaweb.google.com/lh/photo/i9ZgcjRrF9E0mzoDSN548dMTjNZETYmyPJy0liipFm0?feat=directlink\" title=\"Create service account (step 3)\">
-  <img src=\"https://lh4.googleusercontent.com/-Or_U6ntuM7M/UOasoEXN0mI/AAAAAAAAAB0/aD_fJs5IQOI/s912/create_service_account_3.jpg\" style=\"width:100%;\">
-</a>
+![Create service account (step 3)](https://lh4.googleusercontent.com/-Or_U6ntuM7M/UOasoEXN0mI/AAAAAAAAAB0/aD_fJs5IQOI/s912/create_service_account_3.jpg)
+
 
 After you click in *Create client ID* button, the popup will show a message stating that public-private key pair has been generated. You will get a password and your private key (the password is for working with the private key).  
 Save the private key file ('.p12' file type) into your hard drive.
 
-<a href=\"https://picasaweb.google.com/lh/photo/FdbJIVj5Q9FzQd378-sk9tMTjNZETYmyPJy0liipFm0?feat=directlink\" title=\"Create service account (step 4)\">
-  <img src=\"https://lh5.googleusercontent.com/-y5XEIRMWwwk/UOaspLNWc6I/AAAAAAAAAB8/zN0mMwz8-fU/s912/create_service_account_4.jpg\" style=\"width:100%;\">
-</a>
+![Create service account (step 4)](https://lh5.googleusercontent.com/-y5XEIRMWwwk/UOaspLNWc6I/AAAAAAAAAB8/zN0mMwz8-fU/s912/create_service_account_4.jpg)
 
 When you close the popup you will see a new section in the main page (*Service account*). You need to take not about the *Email address* generated for the service account.
 
-<a href=\"https://picasaweb.google.com/lh/photo/Kzy_Ov5_eXnzfrrIBavBWNMTjNZETYmyPJy0liipFm0?feat=directlink\" title=\"Create service account (step 5)\">
-  <img src=\"https://lh5.googleusercontent.com/-bfkyPN8zCCU/UOasp-zLG3I/AAAAAAAAACE/NPFq01WJA0k/s912/create_service_account_5.jpg\" style=\"width:100%;\">
-</a>
+![Create service account (step 5)](https://lh5.googleusercontent.com/-bfkyPN8zCCU/UOasp-zLG3I/AAAAAAAAACE/NPFq01WJA0k/s912/create_service_account_5.jpg)
 
 There's one important last step you need to take here. Google has given you a private key in a '.p12' file, but you will need a *.pem* file in order to sign your JWT.  
 In order to achieve this step you need to have *openssl* tool installed in your system.  
@@ -79,17 +68,13 @@ After that, you will have a new file in your folder called *certificate.pem*. Th
 In this step you need to grant read access to the brand new service account in your Google analytics project.  
 Log in to [Google Analytics](http://www.google.com/analytics/) and navigate to your project. Enter de *Admin* section and look for the *Users* tab.
 
-<a href=\"https://picasaweb.google.com/lh/photo/6qU0laVzunyWT1Y-FuQkYdMTjNZETYmyPJy0liipFm0?feat=directlink\" title=\"Grant access to service account in Google Analytics (step 1)\">
-  <img src=\"https://lh4.googleusercontent.com/-mFT-z5XXZag/UOasq46iNEI/AAAAAAAAACM/lMfqqxqfFYg/s912/grant_service_account_access_to_ga_1.jpg\" style=\"width:100%;\">
-</a>
+![Grant access to service account in Google Analytics (step 1)](https://lh4.googleusercontent.com/-mFT-z5XXZag/UOasq46iNEI/AAAAAAAAACM/lMfqqxqfFYg/s912/grant_service_account_access_to_ga_1.jpg)
 
 Click in the *New User* button and type the email for the service account you previously created. Use the *User* role.  
 In the *profile* section, select your Analytics project profile and add it to *Selected profiles* panel.  
 Finally, push *Create user button*.
 
-<a href=\"https://picasaweb.google.com/lh/photo/gC43Osif4k6HLnzpc-dN-tMTjNZETYmyPJy0liipFm0?feat=directlink\" title=\"Grant access to service account in Google Analytics (step 2)\">
-  <img src=\"https://lh4.googleusercontent.com/-zhgwYXNEFNc/UOasr9ayMZI/AAAAAAAAACU/Wyl7U__pXkA/s912/grant_service_account_access_to_ga_2.jpg\" style=\"width:100%;\">
-</a>
+![Grant access to service account in Google Analytics (step 2)](https://lh4.googleusercontent.com/-zhgwYXNEFNc/UOasr9ayMZI/AAAAAAAAACU/Wyl7U__pXkA/s912/grant_service_account_access_to_ga_2.jpg)
 
 That's it!
 
@@ -199,9 +184,9 @@ The *scope* property of the *claim set* must be set to *readonly*. At least, I c
 The response from *Google* should be something like this:
 ```javascript
 {
-	  \"access_token\" : \"1/8xbJqaOZXSUZbHLl5EOtu1pxz3fmmetKx9W8CV4t79M\",
-  \"token_type\" : \"Bearer\",
-  \"expires_in\" : 3600
+	"access_token" : "1/8xbJqaOZXSUZbHLl5EOtu1pxz3fmmetKx9W8CV4t79M",
+	"token_type": "Bearer",
+	"expires_in": 3600
 }
 ```
 
@@ -215,8 +200,8 @@ var request = require('request'),
 	qs = require('querystring');
 	
 authorize(function(err, token) {
-		if (!err) {
-			// Query the number of total visits for a month
+	if (!err) {
+		// Query the number of total visits for a month
 		var requestConfig = {
 				'ids': 'ga:YOUR_ANALYTICS_PROJECT_PROFILE_ID',
 			'start-date': '2012-12-01',
