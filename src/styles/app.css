@@ -1,0 +1,49 @@
+:root {
+	--titleBackgroundColor: #2d3542;
+	--titleForegroundColor: #fff;
+	--font-size-s: 12px;
+}
+
+h1 a:active, h1 a:focus, h1 a:hover,
+h2 a:active, h2 a:focus, h2 a:hover,
+h3 a:active, h3 a:focus, h3 a:hover
+{
+	--color: var(--titleForegroundColor);
+}
+
+
+.main-content {
+	padding-top: 90px;
+}
+
+@media (min-width: 992px) {
+	.main-content .grid {
+		grid-column-gap: 3rem;
+		grid-template-columns: auto 25%;
+	}
+}
+
+@media (min-width: 576px) {
+    .main-content {
+        max-width: 576px;
+    }
+}
+
+@media (min-width: 768px) {
+    .main-content {
+        max-width: 768px;
+		padding-top: 120px;
+    }
+}
+
+@media (min-width: 992px) {
+    .main-content {
+        max-width: 992px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .main-content {
+        max-width: 1200px;
+    }
+}

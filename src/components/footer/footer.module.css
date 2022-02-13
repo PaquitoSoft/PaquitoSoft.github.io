@@ -1,0 +1,14 @@
+.footer {
+	position: fixed;
+	bottom: 0;
+	background-color: var(--titleBackgroundColor);
+	color: var(--titleForegroundColor);
+	width: 100%;
+	text-align: right;
+	padding: 4px 40px;
+	font-size: var(--font-size-s);
+}
+
+.footer a {
+	margin: 0 4px;
+}
