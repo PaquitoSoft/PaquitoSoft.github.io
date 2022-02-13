@@ -1,9 +1,0 @@
-.header {
-	position: fixed;
-	background-color: var(--titleBackgroundColor);
-	width: 100%;
-}
-
-.title {
-	margin: 10px 30px;
-}

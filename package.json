@@ -1,27 +1,28 @@
 {
-  "name": "ps-blog",
+  "name": "paquito-soft-corner",
+  "version": "1.0.0",
   "private": true,
+  "description": "PaquitoSoft corner",
+  "author": "PaquitoSoft",
+  "keywords": [
+    "gatsby"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && next export -o docs",
-    "start": "next start",
-    "lint": "next lint"
+    "develop": "gatsby develop",
+    "start": "gatsby develop",
+    "build": "gatsby build && mv public docs",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean"
   },
   "dependencies": {
-    "markdown-it": "^12.3.2",
-    "next": "12.0.10",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "yaml-front-matter": "^4.1.1"
-  },
-  "devDependencies": {
-    "@types/markdown-it": "^12.2.3",
-    "@types/node": "17.0.15",
-    "@types/react": "17.0.39",
-    "@types/yaml-front-matter": "^4.1.0",
-    "babel-plugin-superjson-next": "^0.4.2",
-    "eslint": "8.8.0",
-    "eslint-config-next": "12.0.10",
-    "typescript": "4.5.5"
+    "gatsby": "^4.7.1",
+    "gatsby-plugin-react-helmet": "^5.7.0",
+    "gatsby-plugin-sharp": "^4.7.0",
+    "gatsby-remark-images": "^6.7.0",
+    "gatsby-source-filesystem": "^4.7.0",
+    "gatsby-transformer-remark": "^5.7.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-helmet": "^6.1.0"
   }
 }
